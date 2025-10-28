@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { Table, Button, Container } from "react-bootstrap";
-
+import ClassCreate from "./ClassCreate.jsx";
+import { useState } from "react";
 function ClassList() {
   const navigate = useNavigate();
-
+  const [showCreateClass, setShowCreateClass] = useState(false);
+const handleOpenCreateClass = () => setShowCreateClass(true);
+const handleCloseCreateClass = () => setShowCreateClass(false);
   const classes = [
     {
       id: 1,
@@ -14,22 +17,24 @@ function ClassList() {
     { id: 2, name: "Lớp CV02", subject: "Xử lý ảnh", semester: "HK1 2025" },
   ];
 
+
   return (
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3>Danh sách lớp học</h3>
-        <Button variant="primary" onClick={() => navigate("/classes/create")}>
+        <Button variant="primary" onClick={handleOpenCreateClass}>
           + Tạo lớp học
         </Button>
+        <ClassCreate show={showCreateClass} onClose={handleCloseCreateClass} />
       </div>
 
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Tên lớp</th>
-            <th>Môn học</th>
-            <th>Học kỳ</th>
+            <th>MSSV</th>
+            <th>Tên sinh viên</th>
+            <th>Ngày sinh</th>
+            <th>Tên bài thi tham gia</th>
             <th>Hành động</th>
           </tr>
         </thead>

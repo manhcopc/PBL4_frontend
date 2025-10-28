@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Form, Button, Container } from "react-bootstrap";
+import { Form, Button, Container, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function ClassCreate() {
+function ClassCreate({show, onClose}) {
   const [form, setForm] = useState({ name: "", subject: "", semester: "" });
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ function ClassCreate() {
   };
 
   return (
-    <Container className="py-4">
+    <Modal show={show} onHide={onClose} className="py-4">
       <h3>Tạo lớp học mới</h3>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -57,7 +57,7 @@ function ClassCreate() {
           Lưu lớp học
         </Button>
       </Form>
-    </Container>
+    </Modal>
   );
 }
 

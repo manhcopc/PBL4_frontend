@@ -10,7 +10,6 @@ function ClassModule() {
   return (
     <Routes>
       <Route path="/" element={<ClassList />} />
-      <Route path="/create" element={<ClassCreate />} />
       <Route path="/:id" element={<ClassDetail />} />
       <Route path="/:id/exam/:examId" element={<ExamDetail />} />
       <Route path="/:id/students" element={<StudentManager />} />

@@ -1,5 +1,5 @@
 // pages/ExamManagementPage.js
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import {
   Form,
   Table,
@@ -8,15 +8,19 @@ import {
   Container,
   Row,
   Col,
-  Card
+  Card,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import CreateExam from "./ExamManagement/Create";
+import CreateExam from "./CreateExam";
+import EditExam from "./EditExam";
 
-const ExamManagement = () => {
-  const [showCreateExam, setShowCreateClass] = useState(false)
-  const handleShowCreate = () => setShowCreateClass(true)
-  const handleCloseCreate = () => setShowCreateClass(false)
+const ExamModule = () => {
+  const [showCreateExam, setShowCreateClass] = useState(false);
+  const [showEditExam, setShowEditExam] = useState(false);
+  const handleShowCreate = () => setShowCreateClass(true);
+    const handleCloseCreate = () => setShowCreateClass(false);
+    const handleShowEdit = () => setShowEditExam(true)
+    const handleCloseEdit = () => setShowEditExam(false)
 
   return (
     <>
@@ -41,8 +45,8 @@ const ExamManagement = () => {
       </Form>
       <Button variant="primary mt-3" onClick={handleShowCreate}>
         Tạo Đề Thi Mới
-      </Button>
-      
+          </Button>
+          <CreateExam show={showCreateExam} onClose={handleCloseCreate} />
 
       <div className="album py-5 bg-body-tertiary">
         <div className="container">
@@ -76,10 +80,11 @@ const ExamManagement = () => {
                     <Button
                       type="button"
                       variant="btn btn-sm btn-outline-primary"
-                      onClick={() => setEditExam(true)}
+                      onClick={handleShowEdit}
                     >
                       Chỉnh sửa
                     </Button>
+                    <EditExam show={showEditExam} onClose={handleCloseEdit} />
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-danger"
@@ -135,10 +140,8 @@ const ExamManagement = () => {
           </div>
         </div>
       </div>
-      
-      
     </>
   );
 };
 
-export default ExamManagement;
+export default ExamModule;

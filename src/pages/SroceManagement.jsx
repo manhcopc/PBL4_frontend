@@ -1,37 +1,48 @@
 // pages/ScoreManagementPage.js
 import React from "react";
-import { Nav, Form, Table, Button } from "react-bootstrap";
+import { Row, Col, Nav, Form, Table, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const ScoreManagement = () => {
   return (
     <>
       <h2 style={{ color: "#007BFF" }}>Quản Lý Điểm</h2>
-      <Nav variant="tabs" defaultActiveKey="/class">
-        <Nav.Item>
-          <Nav.Link eventKey="class">Theo Lớp</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="subject">Theo Môn Học</Nav.Link>
-        </Nav.Item>
-      </Nav>
-      <Form.Select className="mt-3">
+      <Form>
+        <Row>
+          <Col>
+            <Form.Control
+              type="text"
+              placeholder="Tìm kiếm đề thi..."
+              className="mr-sm-2"
+            />
+          </Col>
+          <Col>
+            <Button variant="primary" type="submit">
+              Tìm Kiếm
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+      {/* <Form.Select className="mt-3">
         <option>Chọn Lớp/Môn</option>
-      </Form.Select>
+      </Form.Select> */}
       <Table striped bordered hover className="mt-3">
         <thead style={{ backgroundColor: "#007BFF", color: "#FFFFFF" }}>
           <tr>
-            <th>Tên Sinh Viên</th>
-            <th>Mã SV</th>
-            <th>Điểm</th>
-            <th>Hành Động</th>
+            <th>Mã đề thi</th>
+            <th>Tên đề thi</th>
+            <th>Môn học</th>
+            <th>Ngày thi</th>
+            <th>Thời gian làm bài</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Nguyễn Văn A</td>
-            <td>SV001</td>
-            <td>9.0</td>
+            <td>Đề thi 1</td>
+            <td>Đề thi Toán</td>
+            <td>Toán học</td>
+            <td>01/01/2023</td>
+            <td>90 phút</td>
             <td>
               <Button variant="primary" size="sm">
                 Chỉnh Sửa

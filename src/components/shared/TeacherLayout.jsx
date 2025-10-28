@@ -15,7 +15,7 @@ const TeacherLayout = () => {
   return (
     <>
       {/* <Navbar userName={userName} onLogout={onLogout} /> */}
-      <Navbar onToggleSidebar={handleShowMobileSidebar} />
+      <Navbar className="fixed-top navbar-brand" onToggleSidebar={handleShowMobileSidebar} />
       <Container fluid className="p-0">
         <Row className="g-0">
           <Col
@@ -33,7 +33,7 @@ const TeacherLayout = () => {
               zIndex: 1020,
             }}
           >
-            <Sidebar />
+            <Sidebar className=""/>
           </Col>
           <Col
             md={10}
@@ -64,14 +64,14 @@ const TeacherLayout = () => {
           closeButton
           style={{ backgroundColor: "#007BFF", color: "white" }}
         >
-          <Offcanvas.Title>Menu</Offcanvas.Title>
+          <Offcanvas.Title className="mx-auto">Menu</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body className="p-0">
           <Sidebar />
         </Offcanvas.Body>
       </Offcanvas>
 
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };
