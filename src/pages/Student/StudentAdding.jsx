@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Form, Button, Container, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function ClassCreate({show, onClose}) {
+function StudentAdding({show, onClose}) {
   const [form, setForm] = useState({ name: "", subject: "", semester: "" });
   const navigate = useNavigate();
 
@@ -17,11 +17,11 @@ function ClassCreate({show, onClose}) {
   };
 
   return (
-    <Modal show={show} onHide={onClose} className="py-4">
-      <h3>Tạo lớp học mới</h3>
+    <Modal show={show} onHide={onClose} className="py-4 px-4 ">
+      <h3 className="text-center">Thêm sinh viên mới</h3>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label>Tên lớp</Form.Label>
+          <Form.Label>Tên sinh viên</Form.Label> {/* Updated label */}
           <Form.Control
             type="text"
             name="name"
@@ -32,33 +32,33 @@ function ClassCreate({show, onClose}) {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Môn học</Form.Label>
+          <Form.Label>MSSV</Form.Label>
           <Form.Control
             type="text"
-            name="subject"
-            value={form.subject}
+            name="mssv" 
+            value={form.mssv} 
             onChange={handleChange}
             required
           />
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>Học kỳ</Form.Label>
+          <Form.Label>Ngày sinh</Form.Label>
           <Form.Control
             type="text"
-            name="semester"
-            value={form.semester}
+            name="dateOfBirth"
+            value={form.dateOfBirth}
             onChange={handleChange}
             required
           />
         </Form.Group>
 
-        <Button variant="success" type="submit">
-          Lưu lớp học
+        <Button className="d-block px-auto" variant="success" type="submit">
+          Lưu
         </Button>
       </Form>
     </Modal>
   );
 }
 
-export default ClassCreate;
+export default StudentAdding;

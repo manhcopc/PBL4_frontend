@@ -9,50 +9,46 @@ import {
   Col,
   Card,
 } from "react-bootstrap";
-export default function EditExam({show, onClose}) {
-    const [examCodes, setExamCodes] = useState([{ code: "", answers: ["A"] }]);
+export default function EditExam({ show, onClose }) {
+  const [examCodes, setExamCodes] = useState([{ code: "", answers: ["A"] }]);
   const [numberOfExamCodes, setNumberOfExamCodes] = useState(1);
-    const [numberOfAnswers, setNumberOfAnswers] = useState(1);
-    const handleNumberOfExamCodesChange = (e) => {
-      const value = parseInt(e.target.value) || 0;
-      setNumberOfExamCodes(value);
+  const [numberOfAnswers, setNumberOfAnswers] = useState(1);
+  const handleNumberOfExamCodesChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setNumberOfExamCodes(value);
 
-      // mở rộng hoặc cắt mảng examCodes
-      const newExamCodes = Array.from({ length: value }, (_, i) => {
-        return examCodes[i] || { code: ``, answers: ["A"] };
-      });
-      setExamCodes(newExamCodes);
-    };
-    const handleChangeExamCode = (index, value) => {
-      const updated = [...examCodes];
-      updated[index].code = value;
-      setExamCodes(updated);
-    };
+    // mở rộng hoặc cắt mảng examCodes
+    const newExamCodes = Array.from({ length: value }, (_, i) => {
+      return examCodes[i] || { code: ``, answers: ["A"] };
+    });
+    setExamCodes(newExamCodes);
+  };
+  const handleChangeExamCode = (index, value) => {
+    const updated = [...examCodes];
+    updated[index].code = value;
+    setExamCodes(updated);
+  };
 
-    // ✅ Khi thay đổi số lượng câu hỏi
-    const handleNumberOfAnswersChange = (e) => {
-      const value = parseInt(e.target.value) || 0;
-      setNumberOfAnswers(value);
-
-      // cập nhật lại mảng answers trong từng mã đề
-      const updated = examCodes.map((exam) => ({
-        ...exam,
-        answers: Array.from(
-          { length: value },
-          (_, i) => exam.answers[i] || "A"
-        ),
-      }));
-      setExamCodes(updated);
-    };
+  // ✅ Khi thay đổi số lượng câu hỏi
+  const handleNumberOfAnswersChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    setNumberOfAnswers(value);
+    // cập nhật lại mảng answers trong từng mã đề
+    const updated = examCodes.map((exam) => ({
+      ...exam,
+      answers: Array.from({ length: value }, (_, i) => exam.answers[i] || "A"),
+    }));
+    setExamCodes(updated);
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Dữ liệu toàn bộ mã đề:", examCodes);
   };
-      const handleChangeAnswer = (examIndex, questionIndex, value) => {
-        const updated = [...examCodes];
-        updated[examIndex].answers[questionIndex] = value;
-        setExamCodes(updated);
-      };
+  const handleChangeAnswer = (examIndex, questionIndex, value) => {
+    const updated = [...examCodes];
+    updated[examIndex].answers[questionIndex] = value;
+    setExamCodes(updated);
+  };
   return (
     <Modal show={show} onHide={onClose} size="lg">
       <Modal.Header closeButton>
