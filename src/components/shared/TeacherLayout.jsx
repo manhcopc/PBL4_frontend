@@ -1,10 +1,8 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
+import { Container, Row, Col, Offcanvas } from "react-bootstrap";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
-import Footer from "./Footer";
-import { Container, Row, Col, Offcanvas } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const TeacherLayout = () => {
@@ -12,48 +10,49 @@ const TeacherLayout = () => {
 
   const handleCloseMobileSidebar = () => setShowMobileSidebar(false);
   const handleShowMobileSidebar = () => setShowMobileSidebar(true);
+
   return (
     <>
-      {/* <Navbar userName={userName} onLogout={onLogout} /> */}
-      <Navbar className="fixed-top navbar-brand" onToggleSidebar={handleShowMobileSidebar} />
+      <Navbar
+        className="position-sticky top-0 w-100 shadow-sm"
+        onToggleSidebar={handleShowMobileSidebar}
+        style={{
+          zIndex: 1030,
+          backgroundColor: "white",
+          minHeight: "var(--bs-navbar-height, 56px)",
+        }}
+      />
       <Container fluid className="p-0">
-        <Row className="g-0">
+        <Row className="g-0 flex-nowrap">
           <Col
-            // md={2}
-            // className="sidebar"
             lg={2}
             xl={2}
-            className="d-none d-lg-block sidebar"
+            className="d-none d-lg-block"
             style={{
               backgroundColor: "#FFFFFF",
               borderRight: "1px solid #E3F2FD",
-              minHeight: "calc(100vh - 56px)",
               position: "sticky",
-              top: "56px",
-              zIndex: 1020,
+              top: 0,
+              height: "100vh",
+              overflowY: "auto",
             }}
           >
-            <Sidebar className=""/>
+            <Sidebar />
           </Col>
           <Col
-            md={10}
-            // className="p-4"
             xs={12}
             lg={10}
             xl={10}
-            className="main-content"
+            className="p-4"
             style={{
-              minHeight: "calc(100vh - 56px)",
               backgroundColor: "#F8F9FA",
+              minHeight: "100vh",
             }}
           >
-            <div className="p-4">
-              <Outlet />
-            </div>
+            <Outlet />
           </Col>
         </Row>
       </Container>
-
       <Offcanvas
         show={showMobileSidebar}
         onHide={handleCloseMobileSidebar}
@@ -62,16 +61,14 @@ const TeacherLayout = () => {
       >
         <Offcanvas.Header
           closeButton
-          style={{ backgroundColor: "#007BFF", color: "white" }}
+          style={{ backgroundColor: "#1C59A1", color: "white" }}
         >
-          <Offcanvas.Title className="mx-auto">Menu</Offcanvas.Title>
+
         </Offcanvas.Header>
         <Offcanvas.Body className="p-0">
           <Sidebar />
         </Offcanvas.Body>
       </Offcanvas>
-
-      {/* <Footer /> */}
     </>
   );
 };

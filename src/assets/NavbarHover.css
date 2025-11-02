@@ -1,0 +1,24 @@
+/* Màu chữ trắng mặc định */
+.custom-nav .nav-link {
+    color: #ffffff !important;
+    /* transition: color 0.2s ease; */
+}
+
+/* Khi hover → đen */
+.custom-nav .nav-link:hover {
+    color: black !important;
+}
+
+/* Khi active → đen (giữ sau khi click) */
+.custom-nav .nav-link.active {
+    color: black !important;
+}
+
+/* Bảo đảm chỉ tab đang active được hiển thị (phòng trường hợp thiếu Bootstrap CSS) */
+.tab-content > .tab-pane {
+    display: none;
+}
+
+.tab-content > .active {
+    display: block;
+}

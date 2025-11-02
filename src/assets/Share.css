@@ -1,0 +1,44 @@
+.confirm-button {
+    font-family: arial;
+    font-weight: bold;
+    color: #14396A !important;
+    font-size: 1rem;
+    width: 8rem;
+    height: auto;
+    text-shadow: 0.5rem 0.5rem 0rem #7CACDE;
+    box-shadow: 0.5rem 1rem 1rem #BEE2F9;
+
+    border-radius: 1rem;
+    border: 0.1rem solid #3866A3;
+    background: #63B8EE;
+    background: linear-gradient(to top, #63B8EE, #468CCF);
+}
+
+.confirm-button:hover {
+    color: #14396A !important;
+    background: #468CCF;
+    background: linear-gradient(to top, #468CCF, #11ACEE);
+}
+
+.cancel-button {
+    font-family: arial;
+    font-weight: bold;
+    color: #14396A !important;
+        font-size: 1rem;
+            width: 8rem;
+            height: auto;
+    text-shadow: 0.5rem 0.5rem 0rem #d36d99;
+    box-shadow: 0.5rem 1rem 1rem #BEE2F9;
+
+    border-radius: 1rem;
+    border: 0.1rem solid #3866A3;
+    background: #F08080;
+    background: linear-gradient(to top, #F08080, #CD5C5C);
+    transition: background 0.3s ease;
+}
+.cancel-button:hover {
+    color: #14396A !important;
+    background: #CD5C5C;
+    background: linear-gradient(to top, #CD5C5C, #F08080);
+}
+

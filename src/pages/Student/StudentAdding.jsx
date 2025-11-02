@@ -17,9 +17,13 @@ function StudentAdding({show, onClose}) {
   };
 
   return (
-    <Modal show={show} onHide={onClose} className="py-4 px-4 ">
-      <h3 className="text-center">Thêm sinh viên mới</h3>
-      <Form onSubmit={handleSubmit}>
+    <Modal show={show} onHide={onClose} className="py-4 px-4">
+      <div style={{ backgroundColor: "#1C59A1" }}>
+        {" "}
+        <h3 className="text-center text-white m-2">Thêm sinh viên mới</h3>
+      </div>
+
+      <Form className="m-3" onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>Tên sinh viên</Form.Label> {/* Updated label */}
           <Form.Control
@@ -35,8 +39,8 @@ function StudentAdding({show, onClose}) {
           <Form.Label>MSSV</Form.Label>
           <Form.Control
             type="text"
-            name="mssv" 
-            value={form.mssv} 
+            name="mssv"
+            value={form.mssv}
             onChange={handleChange}
             required
           />
@@ -45,7 +49,7 @@ function StudentAdding({show, onClose}) {
         <Form.Group className="mb-3">
           <Form.Label>Ngày sinh</Form.Label>
           <Form.Control
-            type="text"
+            type="date"
             name="dateOfBirth"
             value={form.dateOfBirth}
             onChange={handleChange}
@@ -53,7 +57,7 @@ function StudentAdding({show, onClose}) {
           />
         </Form.Group>
 
-        <Button className="d-block px-auto" variant="success" type="submit">
+        <Button className="d-block mx-auto" variant="primary" type="submit">
           Lưu
         </Button>
       </Form>

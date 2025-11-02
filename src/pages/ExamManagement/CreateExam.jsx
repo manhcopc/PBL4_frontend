@@ -15,7 +15,12 @@ export default function CreateExam({show, onClose}) {
   return (
     <Modal show={show} onHide={onClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title style={{ color: "#007BFF" }}>Tạo Đề Thi Mới</Modal.Title>
+        <Modal.Title
+          className="modal-title me-5 fs-2 mx-auto"
+          style={{ color: "#007BFF" }}
+        >
+          Tạo Đề Thi Mới
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -24,10 +29,22 @@ export default function CreateExam({show, onClose}) {
             <Form.Control type="text" placeholder="Nhập tên đề thi" />
           </Form.Group>
           <Form.Group className="mb-3">
+            <Form.Label>Mô tả</Form.Label>
+            <Form.Control type="text" placeholder="Nhập mô tả" />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Ngày thi</Form.Label>
+            <Form.Control type="date" placeholder="Nhập ngày thi" />
+          </Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label>Môn Học</Form.Label>
             <Form.Select>
               <option>Toán</option>
             </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Mô tả</Form.Label>
+            <Form.Control type="text" placeholder="Nhập mô tả" />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Số Lượng Mã Đề</Form.Label>

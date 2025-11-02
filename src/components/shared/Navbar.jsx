@@ -21,11 +21,14 @@ const Navbar = ({ onToggleSidebar }) => {
 
   return (
     <>
-      <BootstrapNavbar 
-        bg="white"
+      <BootstrapNavbar
         expand="lg"
-        className="border-bottom"
-        style={{ borderColor: "#1C59A1", minHeight: "56px", zIndex: 1030 }}
+        className=""
+        style={{
+          minHeight: "56px",
+          zIndex: 1030,
+          backgroundColor: "#1C59A1",
+        }}
       >
         <Container fluid>
           <button
@@ -39,13 +42,12 @@ const Navbar = ({ onToggleSidebar }) => {
 
           <BootstrapNavbar.Brand
             as={Link}
-            to="/dashboard"
-            style={{ color: "#007BFF", fontWeight: "600", fontSize: "1.1rem" }}
-            className="mx-auto"
+            to="/"
+            style={{ color: "#1C59A1", fontWeight: "600" }}
+            className="text-white mx-auto fs-3"
           >
             Hệ Thống Chấm Điểm Thông Minh
           </BootstrapNavbar.Brand>
-
         </Container>
       </BootstrapNavbar>
     </>

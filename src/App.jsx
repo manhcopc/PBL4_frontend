@@ -7,8 +7,9 @@ import Grading from "./pages/Grading";
 import ScoreManagement from "./pages/ScoreManagement/ScoreModule";
 import ExamManagement from "./pages/ExamManagement/ExamModule";
 import TeacherLayout from "./components/shared/TeacherLayout";
-import StudentManagement from "./pages/Student/StudentManager";
+import StudentManagement from "./pages/Student/StudentModule";
 import Login from "./pages/Login";
+import SettingModule from "./pages/Setting/SettingModule";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/scores" element={<ScoreManagement />} />
           <Route path="/exams" element={<ExamManagement />} />
           <Route path="/classes" element={<StudentManagement />} />
+          <Route path="/settings" element={<SettingModule />} />
         </Route>
       </Routes>
     </BrowserRouter>

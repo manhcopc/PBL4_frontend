@@ -1,6 +1,7 @@
 import React from "react";
 import { Nav } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
+import { MdDashboard } from 'react-icons/md';
 import {
   FaSignOutAlt,
   FaCamera,
@@ -10,6 +11,7 @@ import {
   FaCog,
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../assets/NavbarHover.css"
 import { useNavigate } from "react-router-dom";
 
 // const Sidebar = () => {
@@ -37,18 +39,39 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
     >
       <span className="d-flex flex-column align-items-center">
         <img
-          src="/logo192.png"
-          alt="Logo"
-          className="d-inline mx-auto mt-3 w-3 h-auto mx-auto my-auto"
-          // style={{ width: "80px", height: "80px", borderRadius: "50%" }}
+          className="img-fluid rounded bg-light p-1"
+          src="https://i.pravatar.cc/200?img=12"
+          alt="Teacher Avatar"
+          style={{ maxWidth: "100px", borderRadius: "100%" }}
         />
         <h2 className="d-block text-center mt-2 text-white">Tên giáo viên</h2>
       </span>
 
       <hr />
-      <Nav className="flex-column justify-content-around text-align-center h-100 p-3">
+      <Nav
+        variant="tabs"
+        defaultActiveKey="dashboard"
+        className="custom-nav flex-column justify-content-around text-align-center h-100 p-3"
+      >
+        <Nav.Item>
+          <Nav.Link
+            eventKey="dashboard"
+            className={`nav-link
+                  py-3 px-3 mb-2 rounded text-decoration-none
+          
+                  ${isMobile ? "border-bottom" : ""}
+                `}
+            as={Link}
+            to="/"
+            active={location.pathname === "/"}
+            style={{ color: "#FFFFFF", marginBottom: "10px" }}
+          >
+            <MdDashboard /> Dashboard
+          </Nav.Link>
+        </Nav.Item>
         <Nav.Link
-          className={`
+          eventKey={"grading"}
+          className={`nav-link
                 py-3 px-3 mb-2 rounded text-decoration-none
               
                 ${isMobile ? "border-bottom" : ""}
@@ -61,7 +84,8 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
           <FaCamera /> Chấm Bài Tập
         </Nav.Link>
         <Nav.Link
-          className={`
+          eventKey={"scores"}
+          className={`nav-link
                 py-3 px-3 mb-2 rounded text-decoration-none
               
                 ${isMobile ? "border-bottom" : ""}
@@ -74,7 +98,8 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
           <FaTable /> Quản Lý Điểm
         </Nav.Link>
         <Nav.Link
-          className={`
+          eventKey={"exams"}
+          className={`nav-link
                 py-3 px-3 mb-2 rounded text-decoration-none
 
                 ${isMobile ? "border-bottom" : ""}
@@ -87,7 +112,8 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
           <FaFileAlt /> Quản Lý Đề Thi
         </Nav.Link>
         <Nav.Link
-          className={`
+          eventKey={"classes"}
+          className={`nav-link
                 py-3 px-3 mb-2 rounded text-decoration-none
                
                 ${isMobile ? "border-bottom" : ""}
@@ -100,7 +126,8 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
           <FaUsers /> Quản lí sinh viên
         </Nav.Link>
         <Nav.Link
-          className={`
+          eventKey={"settings"}
+          className={`nav-link
                 py-3 px-3 mb-2 rounded text-decoration-none
                 
                 ${isMobile ? "border-bottom" : ""}
