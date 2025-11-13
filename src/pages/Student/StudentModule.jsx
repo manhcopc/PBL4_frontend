@@ -1,21 +1,40 @@
 import { Table, Button, Container, Form, Row, Col } from "react-bootstrap";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import { useParams, useNavigate } from "react-router-dom";
 import StudentAdding from "./StudentAdding.jsx";
 import StudentDetail from "./StudentDetail.jsx";
-
+import examineeApi from "../../services/api/examineeApi.js";
 function StudentModule() {
   // const { id } = useParams();
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
-  const [students, setStudents] = useState([
-    { id: 1, name: "Nguyễn Văn A", date: "01/01/2000", mssv: "SV001" },
-    { id: 2, name: "Trần Thị B", date: "02/02/2000", mssv: "SV002" },
-  ]);
+  // const [students, setStudents] = useState([
+  //   { id: 1, name: "Nguyễn Văn A", date: "01/01/2000", mssv: "SV001" },
+  //   { id: 2, name: "Trần Thị B", date: "02/02/2000", mssv: "SV002" },
+  // ]);
+  const [students, setStudents] = useState([]);
 
-  // const handleDeleteStudent = (id) => {
-  //   setStudents(students.filter((student) => student.id !== id));
-  // };
+  const handleDeleteStudent = async (id) => {
+    const confirmDelete = window.confirm("Ban co chac muon xoa thi sinh nay")
+    if (!confirmDelete) return;
+
+    try {
+      await examineeApi.deleteExaminee(id);
+      fetchStudents();
+    } catch (error) {
+      console.error("Lỗi xoá:", error);
+      alert("Không thể xoá thí sinh!");
+    }
+  };
+
+  const fetchStudents = async () => {
+    const res = await examineeApi.getAllExaminees();
+    setStudents(res.data);
+  };
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+  // console.log(JSON.stringify(students,null,2))
 
   return (
     <Container className="mx-auto">
@@ -46,6 +65,7 @@ function StudentModule() {
       <StudentAdding
         show={showAddStudent}
         onClose={() => setShowAddStudent(false)}
+        onSuccess={fetchStudents}
       />
       <Table striped bordered hover responsive>
         <thead>
@@ -63,9 +83,9 @@ function StudentModule() {
               <td>{i + 1}</td>
               <td>{sv.mssv}</td>
               <td>{sv.name}</td>
-              <td>{sv.date}</td>
+              <td>{sv.date_of_birth}</td>
               <td>
-                <Button size="sm" className="mx-auto my-auto" variant="danger">
+                <Button size="sm" className="mx-auto my-auto" variant="danger" onClick={()=>handleDeleteStudent(sv.id)}>
                   Xóa
                 </Button>
                 <Button

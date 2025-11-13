@@ -37,7 +37,7 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
       style={{ backgroundColor: "#1C59A1" }}
       className="d-flex flex-column h-100"
     >
-      <span className="d-flex flex-column align-items-center">
+      <span className="d-flex flex-column align-items-center mt-4">
         <img
           className="img-fluid rounded bg-light p-1"
           src="https://i.pravatar.cc/200?img=12"

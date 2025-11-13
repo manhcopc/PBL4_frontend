@@ -23,7 +23,7 @@ const Navbar = ({ onToggleSidebar }) => {
     <>
       <BootstrapNavbar
         expand="lg"
-        className=""
+        className="bg-light"
         style={{
           minHeight: "56px",
           zIndex: 1030,
@@ -44,7 +44,7 @@ const Navbar = ({ onToggleSidebar }) => {
             as={Link}
             to="/"
             style={{ color: "#1C59A1", fontWeight: "600" }}
-            className="text-white mx-auto fs-3"
+            className="mx-auto fs-3"
           >
             Hệ Thống Chấm Điểm Thông Minh
           </BootstrapNavbar.Brand>

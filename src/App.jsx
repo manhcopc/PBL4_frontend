@@ -11,7 +11,20 @@ import StudentManagement from "./pages/Student/StudentModule";
 import Login from "./pages/Login";
 import SettingModule from "./pages/Setting/SettingModule";
 
+import React, { useEffect } from "react";
+import { fetchTokens } from "./services/auth";
+// import api from "./services/api";
+
 function App() {
+    useEffect(() => {
+      const initAuth = async () => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          await fetchTokens(); 
+        }
+      };
+      initAuth();
+    }, []);
   return (
     <BrowserRouter>
       <Routes>

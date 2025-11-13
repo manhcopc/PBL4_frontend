@@ -1,42 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Modal, Row, Col, Card, Button } from "react-bootstrap";
 
-function StudentDetail({ show, onClose }) {
-  const SAMPLE_STUDENT_DETAIL = useMemo(
-    () => ({
-      id: "SV001",
-      fullName: "Tên sinh viên",
-      studentCode: "12345678",
-      dateOfBirth: "2004-11-03",
-      avatarUrl: "https://i.pravatar.cc/200?img=12",
-      exams: [
-        {
-          examId: "EXM001",
-          examName: "Thi giữa kỳ Toán 12",
-          examCode: "TOAN-GK-12",
-          correctCount: 18,
-          totalQuestions: 20,
-          score: 9.0,
-          takenAt: "2024-03-12",
-        },
-        {
-          examId: "EXM002",
-          examName: "Thi giữa kỳ Ngữ văn 12",
-          examCode: "NV-GK-12",
-          correctCount: 16,
-          totalQuestions: 20,
-          score: 8.0,
-          takenAt: "2024-03-18",
-        },
-      ],
-    }),
-    []
-  );
-
-  const [studentDetail, setStudentDetail] = useState(SAMPLE_STUDENT_DETAIL);
-
+function StudentDetail({ show, onClose, data }) {
+  const [studentDetail, setStudentDetail] = useState({name: "", date_of_birth:""});
+  useEffect(() => {
+    if (data) {
+      setStudentDetail((prev) => ({
+        ...prev,
+        fullName: data.name,
+        // studentCode: data.mssv,
+        date_of_birth: data.date_of_birth,
+      }));
+    }
+  }, [data]);
+  if (!data) return null;
   const handleResetToSample = () => {
-    setStudentDetail(SAMPLE_STUDENT_DETAIL);
+    setStudentDetail();
   };
 
   const formatDate = (isoDate) => {
@@ -65,16 +44,16 @@ function StudentDetail({ show, onClose }) {
           <Col sm={6} className="mb-3 mb-sm-0">
             <img
               className="img-fluid rounded bg-light p-1"
-              src={studentDetail.avatarUrl}
-              alt={studentDetail.fullName}
+              src="https://i.pravatar.cc/200?img=12"
+              alt={data.name}
               style={{ maxWidth: "200px" }}
             />
           </Col>
 
           <Col sm={6}>
-            <p className="mb-1 fw-bold">Họ và tên: {studentDetail.fullName}</p>
-            <p className="mb-1 fw-bold">MSSV: {studentDetail.studentCode}</p>
-            <p className="mb-0 fw-bold">Ngày sinh: {formatDate(studentDetail.dateOfBirth)}</p>
+            <p className="mb-1 fw-bold">Họ và tên: {data.name}</p>
+            <p className="mb-1 fw-bold">MSSV: {data.mssv}</p>
+            <p className="mb-0 fw-bold">Ngày sinh: {formatDate(data.date_of_birth)}</p>
           </Col>
         </Row>
         <hr className="mb-0" />
