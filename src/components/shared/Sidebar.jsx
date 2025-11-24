@@ -13,6 +13,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../assets/NavbarHover.css"
 import { useNavigate } from "react-router-dom";
+import authService from "../../application/auth";
 
 // const Sidebar = () => {
 //   const location = useLocation();
@@ -21,15 +22,14 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
   const navigate = useNavigate();
 
   const handleItemClick = () => {
-    // Đóng sidebar trên mobile khi click vào item
     if (isMobile && onItemClick) {
       onItemClick();
     }
   };
   const handleLogout = () => {
-    // onLogout();
-    navigate("/login");
-  }
+    authService.logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     // <div style={{ backgroundColor: "#f8f9fa" }} className="h-100">
@@ -53,7 +53,7 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
         defaultActiveKey="dashboard"
         className="custom-nav flex-column justify-content-around text-align-center h-100 p-3"
       >
-        <Nav.Item>
+        {/* <Nav.Item>
           <Nav.Link
             eventKey="dashboard"
             className={`nav-link
@@ -68,7 +68,7 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
           >
             <MdDashboard /> Dashboard
           </Nav.Link>
-        </Nav.Item>
+        </Nav.Item> */}
         <Nav.Link
           eventKey={"grading"}
           className={`nav-link
@@ -77,8 +77,8 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
                 ${isMobile ? "border-bottom" : ""}
               `}
           as={Link}
-          to="/grading"
-          active={location.pathname === "/grading"}
+          to="/"
+          active={location.pathname === "/"}
           style={{ color: "#FFFFFF", marginBottom: "10px" }}
         >
           <FaCamera /> Chấm Bài Tập

@@ -8,5 +8,12 @@ const examineeRecordApi = {
         api.delete(`/Exams/${examId}/ExamineeRecords/${recordId}/`),
     getAllRecord: (examId) =>
         api.get(`/Exams/${examId}/ExamineeRecords`),
+    getRecordByPaper: (examId, paperId) =>
+        api.get(`/Exams/${examId}/ExamineeRecords`, {
+            params: { paper: paperId },
+        }),
+    getResult: (id) =>
+        api.get(`/ExamineeRecords/${id}/Result`)
 }
 export default examineeRecordApi;
+

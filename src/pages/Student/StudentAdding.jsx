@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { Form, Button, Container, Modal } from "react-bootstrap";
-import examineeApi from "../../services/api/examineeApi";
+import studentService from "../../application/studentManagement";
 
 function StudentAdding({ show, onClose, data, onSuccess }) {
   const isEdit = !!data;
-  // const [form, setForm] = useState({ name: "", mssv: "", date_of_birth: "" });
-  const [form, setForm] = useState({ name: "", date_of_birth: "" });
+  const [form, setForm] = useState({
+    fullName: "",
+    studentCode: "",
+    dateOfBirth: "",
+    className: "",
+  });
 
   const handleChange = (e) => {
-    // setForm({ ...form, [e.target.name]: e.target.value });
         const { name, value } = e.target;
 
         setForm((prev) => ({
@@ -20,12 +23,14 @@ function StudentAdding({ show, onClose, data, onSuccess }) {
     e.preventDefault();
     try {
             const payload = {
-              ...form,
-              date_of_birth: form.date_of_birth, 
+              fullName: form.fullName,
+              studentCode: form.studentCode,
+              dateOfBirth: form.dateOfBirth,
+              className: form.className,
             };
-      await examineeApi.addExaminee(payload);
+      await studentService.addStudent(payload);
       alert("Đã thêm sinh viên thành công!");
-      setForm({ name: "", studentId: "", className: "" });
+      setForm({ fullName: "", studentCode: "", dateOfBirth: "", className: "" });
       if (onSuccess) onSuccess();
       onClose();
       console.log(JSON.stringify(form, null, 2));
@@ -44,42 +49,43 @@ function StudentAdding({ show, onClose, data, onSuccess }) {
       </div>
 
       <Form className="m-3" onSubmit={handleSubmit}>
-        {/* Tên sinh viên */}
         <Form.Group className="mb-3">
           <Form.Label htmlFor="studentName">Tên sinh viên</Form.Label>
           <Form.Control
             id="studentName"
             type="text"
-            name="name"
+            name="fullName"
             autoComplete="name"
-            value={form.name}
+            value={form.fullName}
             onChange={handleChange}
+            placeholder="Nhập tên sinh viên"
             required
           />
         </Form.Group>
 
-        {/* MSSV */}
         <Form.Group className="mb-3">
           <Form.Label htmlFor="studentCode">MSSV</Form.Label>
           <Form.Control
             id="studentCode"
             type="text"
-            name="mssv"
-            autoComplete="off"
-            value={form.mssv || ""}
+            name="studentCode"
+            autoComplete="student_ID"
+            value={form.studentCode}
             onChange={handleChange}
+            placeholder="Nhập mã số sinh viên"
+            required
           />
         </Form.Group>
 
-        {/* Ngày sinh */}
         <Form.Group className="mb-3">
           <Form.Label htmlFor="dob">Ngày sinh</Form.Label>
           <Form.Control
             id="dob"
             type="date"
-            name="date_of_birth"
-            value={form.date_of_birth || ""}
+            name="dateOfBirth"
+            value={form.dateOfBirth || ""}
             onChange={handleChange}
+            placeholder="Nhập ngày sinh"
             autoComplete="bday"
             required
           />
@@ -94,3 +100,15 @@ function StudentAdding({ show, onClose, data, onSuccess }) {
 }
 
 export default StudentAdding;
+
+        // <Form.Group className="mb-3">
+        //   <Form.Label htmlFor="className">Lớp</Form.Label>
+        //   <Form.Control
+        //     id="className"
+        //     type="text"
+        //     name="className"
+        //     value={form.className || ""}
+        //     onChange={handleChange}
+        //     placeholder="Nhập lớp"
+        //   />
+        // </Form.Group>

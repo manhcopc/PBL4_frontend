@@ -1,51 +1,64 @@
-import { useEffect, useState } from "react";
-import { BiSolidDetail } from "react-icons/bi";
-import { FaList } from "react-icons/fa";
-import {
-  Tab,
-  Nav,
-  Form,
-  Table,
-  Button,
-  Modal,
-  Row,
-  Col,
-  Card,
-} from "react-bootstrap";
-import "../../assets/NavbarHover.css";
-const STUDENT_POOL = [
-  { id: "SV001", fullName: "Nguyễn Văn A" },
-  { id: "SV002", fullName: "Trần Thị B" },
-  { id: "SV003", fullName: "Lê Thị C" },
-  { id: "SV004", fullName: "Phạm Quốc D" },
-  { id: "SV005", fullName: "Đỗ Minh E" },
-];
-function AddStudentToExam({ show, onClose, onConfirm, existingStudentIds }) {
+import { useEffect, useMemo, useState } from "react";
+import { Form, Table, Button, Modal, Spinner } from "react-bootstrap";
+import examManagementService from "../../application/examManagement";
+
+export default function AddStudentToExam({
+  show,
+  onClose,
+  onConfirm,
+  existingStudentIds = new Set(),
+}) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [studentOptions, setStudentOptions] = useState([]);
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!show) {
+    if (show) {
+      fetchStudents();
+    } else {
       setSearchTerm("");
       setSelectedIds(new Set());
+      setErrorMessage("");
     }
   }, [show]);
 
-  const normalizedTerm = searchTerm.trim().toLowerCase();
+  const fetchStudents = async () => {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const candidates = await examManagementService.listAvailableStudents();
+      setStudentOptions(candidates || []);
+    } catch (error) {
+      console.error("Không thể tải danh sách thí sinh", error);
+      setErrorMessage("Không thể tải danh sách thí sinh.");
+      setStudentOptions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredStudents = STUDENT_POOL.filter((student) => {
-    if (existingStudentIds.has(student.id)) {
-      return false;
-    }
-    if (!normalizedTerm) {
-      return true;
-    }
-    return (
-      student.id.toLowerCase().includes(normalizedTerm) ||
-      student.fullName.toLowerCase().includes(normalizedTerm) ||
-      student.className.toLowerCase().includes(normalizedTerm)
-    );
-  });
+  const getStudentKey = (student) =>
+    student.examineeId ?? student.id ?? student.recordId;
+
+  const filteredStudents = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return (studentOptions || []).filter((student) => {
+      if (existingStudentIds.has(getStudentKey(student))) {
+        return false;
+      }
+      if (!term) return true;
+      return (
+        student.fullName?.toLowerCase().includes(term) ||
+        student.name?.toLowerCase().includes(term) ||
+        student.studentCode?.toLowerCase().includes(term) ||
+        student.student_ID?.toLowerCase().includes(term) ||
+        student.className?.toLowerCase().includes(term)
+      );
+    });
+  }, [studentOptions, searchTerm, existingStudentIds]);
 
   const toggleSelection = (studentId) => {
     setSelectedIds((prev) => {
@@ -59,16 +72,24 @@ function AddStudentToExam({ show, onClose, onConfirm, existingStudentIds }) {
     });
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (selectedIds.size === 0) {
-      onClose();
+      onClose?.();
       return;
     }
-    const selectedStudents = STUDENT_POOL.filter((student) =>
-      selectedIds.has(student.id)
-    );
-    onConfirm(selectedStudents);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      const selectedStudents = studentOptions.filter((student) =>
+        selectedIds.has(getStudentKey(student))
+      );
+      await onConfirm(selectedStudents);
+      onClose?.();
+    } catch (error) {
+      console.error("Không thể thêm thí sinh", error);
+      alert("Không thể thêm thí sinh vào kỳ thi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -85,52 +106,66 @@ function AddStudentToExam({ show, onClose, onConfirm, existingStudentIds }) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Form>
-        <Table striped hover responsive>
-          <thead>
-            <tr>
-              <th>Chọn</th>
-              <th>Mã Sinh Viên</th>
-              <th>Họ Tên</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.length === 0 ? (
+        {loading ? (
+          <div className="py-4 text-center">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        ) : errorMessage ? (
+          <div className="text-danger text-center py-3">{errorMessage}</div>
+        ) : (
+          <Table striped hover responsive>
+            <thead>
               <tr>
-                <td colSpan={4} className="text-center text-muted py-3">
-                  Không tìm thấy thí sinh phù hợp.
-                </td>
+                <th>Chọn</th>
+                <th>Mã Sinh Viên</th>
+                <th>Họ Tên</th>
+                <th>Lớp</th>
               </tr>
-            ) : (
-              filteredStudents.map((student) => (
-                <tr key={student.id}>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={selectedIds.has(student.id)}
-                      onChange={() => toggleSelection(student.id)}
-                    />
+            </thead>
+            <tbody>
+              {filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-center text-muted py-3">
+                    Không tìm thấy thí sinh phù hợp.
                   </td>
-                  <td>{student.id}</td>
-                  <td>{student.fullName}</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </Table>
+              ) : (
+                filteredStudents.map((student) => {
+                  const key = getStudentKey(student);
+                  return (
+                    <tr key={key}>
+                      <td>
+                        <Form.Check
+                          type="checkbox"
+                          checked={selectedIds.has(key)}
+                          onChange={() => toggleSelection(key)}
+                        />
+                      </td>
+                      <td>
+                        {student.studentCode || student.student_ID || key}
+                      </td>
+                      <td>{student.fullName || student.name || ""}</td>
+                      <td>{student.className || ""}</td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </Table>
+        )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
           Hủy
         </Button>
         <Button
           variant="primary"
           onClick={handleConfirm}
-          disabled={selectedIds.size === 0}
+          disabled={selectedIds.size === 0 || isSubmitting}
         >
-          Thêm {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
+          {isSubmitting ? "Đang thêm..." : `Thêm${selectedIds.size ? ` (${selectedIds.size})` : ""}`}
         </Button>
       </Modal.Footer>
     </Modal>
   );
 }
-export default AddStudentToExam;
