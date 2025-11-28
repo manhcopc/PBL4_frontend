@@ -21,7 +21,7 @@ export const mapScoreRecord = (record = {}, index = 0) => {
     record.score ?? record.total_score ?? record.totalScore ?? record.mark ?? 0;
 
   return createScoreRecord({
-    recordId: record.id,
+    recordId: record.id ?? record.record_id ?? null,
     examineeId:
       examinee.id ??
       record.examinee ??
@@ -46,12 +46,12 @@ export const mapScoreRecord = (record = {}, index = 0) => {
     pendingImage:
       record.pending_image_url ??
       record.before_grade_image ??
-      record.pendingImage ??
+      record.original_image ??
       null,
     gradedImage:
       record.graded_image_url ??
       record.after_grade_image ??
-      record.gradedImage ??
+      record.processed_image ??
       null,
   });
 };

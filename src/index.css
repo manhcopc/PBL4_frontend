@@ -20,6 +20,15 @@ body,
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+#portal-root {
+  position: relative;
+  z-index: 999999999 !important;
+}
+body.modal-open {
+  display: block !important;
+  overflow: hidden !important;
+}
+
 
 a {
   font-weight: 500;

@@ -1,13 +1,22 @@
 import { Modal, Table, Button, Row, Col, Form, Spinner } from "react-bootstrap";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import scoreManagementService from "../../application/scoreManagement";
-
+import ImageWithLightbox from "../../components/shared/item/ImageWithLightBox";
+import ImageLightboxPortal from "../../components/shared/item/ImageLightBoxPortal";
+import Portal from "../../components/shared/item/Portal";
+import "../../assets/Share.css";
 export default function Detail({ show, onClose, exam }) {
   const [records, setRecords] = useState([]);
   const [originalRecords, setOriginalRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [zoomImage, setZoomImage] = useState(null);
+
+const openZoom = (src) => setZoomImage(src);
+const closeZoom = () => setZoomImage(null);
+
 
   const examId = exam?.id;
   const totalQuestions = exam?.questionCount || 0;
@@ -135,156 +144,177 @@ export default function Detail({ show, onClose, exam }) {
     return null;
   }
 
+
+
+
   return (
-    <Modal
-      style={{ boxShadow: "0 4px 20px rgba(13, 110, 253, 0.3)" }}
-      className="shadow-lg"
-      show={show}
-      onHide={onClose}
-      size="lg"
-      centered
-    >
-      <Modal.Header closeButton>
-        <Modal.Title>Chi tiết kỳ thi</Modal.Title>
-      </Modal.Header>
+    <>
+      {zoomImage && (
+        <Portal>
+          <div
+            // className="fixed inset-0 bg-black/70 flex items-center justify-center z-[99999999]"
+            className="lightbox-overlay"
+            onClick={closeZoom}
+          >
+            <img
+              src={zoomImage}
+              className="h-full w-auto rounded shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
 
-      <Modal.Body>
-        {errorMessage && (
-          <div className="text-danger text-center mb-3">{errorMessage}</div>
-        )}
-        {isLoading ? (
-          <div className="text-center py-4">
-            <Spinner animation="border" variant="primary" />
+            <button
+              onClick={closeZoom}
+              className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-full shadow-lg"
+            >
+              ✕
+            </button>
           </div>
-        ) : (
-          <>
-            <p>
-              <strong>Tổng số câu hỏi:</strong> {totalQuestions || "—"}
-            </p>
-            <p>
-              <strong>Tổng số sinh viên:</strong> {totalStudents}
-            </p>
-            <p>
-              <strong>Điểm trung bình: </strong>
-              {averageScore}
-            </p>
+        </Portal>
+      )}
 
-            <hr />
-            <h6 className="fw-bold text-secondary mb-3">Danh sách kết quả</h6>
+      <Modal
+        style={{ boxShadow: "0 4px 20px rgba(13, 110, 253, 0.3)" }}
+        className="shadow-lg"
+        show={show}
+        onHide={onClose}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Chi tiết kỳ thi</Modal.Title>
+        </Modal.Header>
 
-            <Table bordered hover responsive>
-              <thead className="table-light">
-                <tr>
-                  <th>#</th>
-                  <th>Mã SV</th>
-                  <th>Họ tên</th>
-                  <th>Mã đề</th>
-                  <th>Số câu đúng</th>
-                  <th>Điểm</th>
-                  <th>Bài thi chưa chấm</th>
-                  <th>Bài thi đã chấm</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="text-center text-muted py-3">
-                      Chưa có dữ liệu bài thi.
-                    </td>
-                  </tr>
-                ) : (
-                  records.map((record, index) => (
-                    <tr key={record.recordId}>
-                      <td>{index + 1}</td>
-                      <td>{record.studentCode}</td>
-                      <td>{record.fullName}</td>
-                      <td>{record.paperCode}</td>
-                      <td style={{ width: "150px" }}>
-                        <Form.Control
-                          type="number"
-                          min="0"
-                          max={totalQuestions || undefined}
-                          value={record.correctCount}
-                          onChange={(e) =>
-                            handleChange(record.recordId, "correctCount", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td style={{ width: "150px" }}>
-                        <Form.Control
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="10"
-                          value={record.score}
-                          onChange={(e) =>
-                            handleChange(record.recordId, "score", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <div className="d-flex flex-column gap-2">
-                          {record.pendingImage ? (
-                            <img
-                              src={record.pendingImage}
-                              alt="Bài thi chưa chấm"
-                              style={{ maxWidth: "120px" }}
-                            />
-                          ) : (
-                            <span className="text-muted">—</span>
-                          )}
-                          <Form.Control
-                            type="file"
-                            accept="image/*"
-                            size="sm"
-                            onChange={(e) =>
-                              handleImageChange(record.recordId, "pendingImage", e.target.files?.[0])
-                            }
-                          />
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex flex-column gap-2">
-                          {record.gradedImage ? (
-                            <img
-                              src={record.gradedImage}
-                              alt="Bài thi đã chấm"
-                              style={{ maxWidth: "120px" }}
-                            />
-                          ) : (
-                            <span className="text-muted">—</span>
-                          )}
-                          <Form.Control
-                            type="file"
-                            accept="image/*"
-                            size="sm"
-                            onChange={(e) =>
-                              handleImageChange(record.recordId, "gradedImage", e.target.files?.[0])
-                            }
-                          />
-                        </div>
-                      </td>
+        <Modal.Body>
+          {errorMessage && (
+            <div className="text-danger text-center mb-3">{errorMessage}</div>
+          )}
+          {isLoading ? (
+            <div className="text-center py-4">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : (
+            <>
+              <p>
+                <strong>Tổng số câu hỏi:</strong> {totalQuestions || "—"}
+              </p>
+              <p>
+                <strong>Tổng số sinh viên:</strong> {totalStudents}
+              </p>
+              <p>
+                <strong>Điểm trung bình: </strong>
+                {averageScore}
+              </p>
+
+              <hr />
+              <h6 className="fw-bold text-secondary mb-3">Danh sách kết quả</h6>
+              <div className="table-responsive">
+                <Table bordered hover className="mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th>#</th>
+                      {/* <th>Mã SV</th> */}
+                      <th>Họ tên</th>
+                      {/* <th>Mã đề</th> */}
+                      {/* <th>Số câu đúng</th> */}
+                      <th>Điểm</th>
+                      <th>Bài thi chưa chấm</th>
+                      <th>Bài thi đã chấm</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </Table>
-          </>
-        )}
-      </Modal.Body>
+                  </thead>
+                  <tbody>
+                    {records.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="text-center text-muted py-3">
+                          Chưa có dữ liệu bài thi.
+                        </td>
+                      </tr>
+                    ) : (
+                      records.map((record, index) => (
+                        <tr key={record.recordId}>
+                          <td>{index + 1}</td>
+                          {/* <td>{record.studentCode}</td> */}
+                          <td>{record.fullName}</td>
+                          {/* <td>{record.paperCode}</td> */}
+                          {/* <td style={{ width: "150px" }}>
+                            <Form.Control
+                              type="number"
+                              min="0"
+                              max={totalQuestions || undefined}
+                              value={record.correctCount}
+                              onChange={(e) =>
+                                handleChange(
+                                  record.recordId,
+                                  "correctCount",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td> */}
+                          <td style={{ width: "150px" }}>
+                            <Form.Control
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max="10"
+                              value={record.score}
+                              onChange={(e) =>
+                                handleChange(
+                                  record.recordId,
+                                  "score",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <div className="d-flex flex-column gap-2">
+                              {record.pendingImage ? (
+                                <img
+                                  src={record.pendingImage}
+                                  onClick={() => openZoom(record.pendingImage)}
+                                  style={{ cursor: "zoom-in", maxWidth: 80 }}
+                                />
+                              ) : (
+                                <span className="text-muted small">—</span>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex flex-column gap-2">
+                              {record.gradedImage ? (
+                                <img
+                                  src={record.gradedImage}
+                                  onClick={() => openZoom(record.gradedImage)}
+                                  style={{ cursor: "zoom-in", maxWidth: 80 }}
+                                />
+                              ) : (
+                                <span className="text-muted small">—</span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Modal.Body>
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onClose} disabled={isSaving}>
-          Đóng
-        </Button>
-        <Button
-          variant="primary"
-          onClick={handleSave}
-          disabled={isSaving || isLoading || !records.length}
-        >
-          {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+            Đóng
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={isSaving || isLoading || !records.length}
+          >
+            {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }

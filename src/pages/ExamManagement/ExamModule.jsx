@@ -8,6 +8,7 @@ import {
   Container,
   Row,
   Col,
+  Spinner,
   Card,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -124,116 +125,122 @@ const ExamModule = () => {
         onSuccess={fetchExams}
       />
 
-      <div className="album py-5 bg-body-tertiary">
+      {/* <div className="album py-5 bg-body-tertiary">
         <div className="container">
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            {isLoading ? (
-              <div className="text-center py-5">Đang tải danh sách đề thi...</div>
-            ) : examError ? (
-              <div className="text-center text-danger py-5 col-12">{examError}</div>
-            ) : exams.length === 0 ? (
-              <div className="text-center text-muted py-5 col-12">
-                Chưa có kỳ thi nào.
-              </div>
-            ) : (
-              exams
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"> */}
+      {isLoading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : examError ? (
+        <div className="text-danger text-center py-5">{examError}</div>
+      ) : exams.length === 0 ? (
+        <div className="text-center text-muted py-5">Chưa có kỳ thi nào.</div>
+      ) : (
+        <div className="album py-5 bg-body-tertiary">
+          <div className="container">
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+              {exams
                 .filter((exam) => {
                   const term = searchTerm.trim().toLowerCase();
                   if (!term) return true;
-                const name = (exam.name || "").toLowerCase();
-                const description = (exam.description || "").toLowerCase();
-                const subject = (exam.subject || "").toLowerCase();
-                const date = (exam.exam_date || "").toLowerCase();
-                return (
-                  name.includes(term) ||
-                  description.includes(term) ||
-                  subject.includes(term) ||
-                  date.includes(term)
-                );
-              })
-              .map((exam) => (
-                <div
-                  key={exam.id}
-                  className="col border-0"
-                  style={{ borderRadius: "1rem" }}
-                >
+                  const name = (exam.name || "").toLowerCase();
+                  const description = (exam.description || "").toLowerCase();
+                  const subject = (exam.subject || "").toLowerCase();
+                  const date = (exam.exam_date || "").toLowerCase();
+                  return (
+                    name.includes(term) ||
+                    description.includes(term) ||
+                    subject.includes(term) ||
+                    date.includes(term)
+                  );
+                })
+                .map((exam) => (
                   <div
-                    className="border-0 card shadow-sm"
+                    key={exam.id}
+                    className="col border-0"
                     style={{ borderRadius: "1rem" }}
                   >
                     <div
-                      className="text-white card-header"
-                      style={{
-                        backgroundColor: "#1C59A1",
-                        borderRadius: "1rem 1rem 0 0",
-                      }}
+                      className="border-0 card shadow-sm"
+                      style={{ borderRadius: "1rem" }}
                     >
-                      <h3 className="text-center">{exam.name}</h3>
-                    </div>
-
-                    <div
-                      className="card-body"
-                      style={{
-                        boxShadow:
-                          " -2px 1px 15px 0px rgba(152, 182, 246, 0.97), inset 2px -1px 15px 0px rgba(158, 142, 142, 0.33)",
-                        borderRadius: "0 0 1rem 1rem",
-                      }}
-                    >
-                      <p className="d-block card-subtitle mb-2 text-body-secondary text-center">
-                        {exam.description || "Không có mô tả"}
-                      </p>
-
-                      <div className="d-flex align-item-center justify-content-between mx-3">
-                        <p className="card-text fw-bold">Ngày kiểm tra</p>
-                        <p className="card-text fw-bold">{exam.exam_date}</p>
-                      </div>
-                      <div className="d-flex align-item-center justify-content-between mx-3">
-                        <p className="card-text fw-bold">Môn học:</p>
-                        <p className="card-text fw-bold">{exam.subject}</p>
-                      </div>
-                      <div className="d-flex align-item-center justify-content-between mx-3">
-                        <p className="card-text fw-bold">Số câu hỏi:</p>
-                        <p className="card-text fw-bold">
-                          {exam.questionCount ?? "—"}
-                        </p>
-                      </div>
-                      <div className="d-flex align-item-center justify-content-between mx-3">
-                        <p className="card-text fw-bold">Số lượng mã đề:</p>
-                        <p className="card-text fw-bold">
-                          {exam.paperCount ?? "—"}
-                        </p>
-                      </div>
-                      <div className="d-flex align-item-center justify-content-between mx-3">
-                        <p className="card-text fw-bold">Số lượng thí sinh:</p>
-                        <p className="card-text fw-bold">
-                          {exam.studentCount ?? "—"}
-                        </p>
+                      <div
+                        className="text-white card-header piosition-relative"
+                        style={{
+                          backgroundColor: "#1C59A1",
+                          borderRadius: "1rem 1rem 0 0",
+                        }}
+                      >
+                        <h3 className="position-absolute">#{exam.id}</h3>
+                        <h3 className="text-center">{exam.name}</h3>
                       </div>
 
-                      <div className="d-flex btn-group justify-content-center align-items-center">
-                        <Button
-                          type="button"
-                          variant="btn btn-sm btn-outline-primary"
-                          className="confirm-button"
-                          onClick={() => handleShowEdit(exam)}
-                        >
-                          Chỉnh sửa
-                        </Button>
-                        <button
-                          type="button"
-                          className="cancel-button btn btn-sm btn-outline-danger"
-                        >
-                          Xóa
-                        </button>
+                      <div
+                        className="card-body"
+                        style={{
+                          boxShadow:
+                            " -2px 1px 15px 0px rgba(152, 182, 246, 0.97), inset 2px -1px 15px 0px rgba(158, 142, 142, 0.33)",
+                          borderRadius: "0 0 1rem 1rem",
+                        }}
+                      >
+                        <p className="d-block card-subtitle mb-2 text-body-secondary text-center">
+                          {exam.description || "Không có mô tả"}
+                        </p>
+
+                        <div className="d-flex align-item-center justify-content-between mx-3">
+                          <p className="card-text fw-bold">Ngày kiểm tra</p>
+                          <p className="card-text fw-bold">{exam.exam_date}</p>
+                        </div>
+                        <div className="d-flex align-item-center justify-content-between mx-3">
+                          <p className="card-text fw-bold">Môn học:</p>
+                          <p className="card-text fw-bold">{exam.subject}</p>
+                        </div>
+                        <div className="d-flex align-item-center justify-content-between mx-3">
+                          <p className="card-text fw-bold">Số câu hỏi:</p>
+                          <p className="card-text fw-bold">
+                            {exam.questionCount ?? "—"}
+                          </p>
+                        </div>
+                        <div className="d-flex align-item-center justify-content-between mx-3">
+                          <p className="card-text fw-bold">Số lượng mã đề:</p>
+                          <p className="card-text fw-bold">
+                            {exam.paperCount ?? "—"}
+                          </p>
+                        </div>
+                        <div className="d-flex align-item-center justify-content-between mx-3">
+                          <p className="card-text fw-bold">
+                            Số lượng thí sinh:
+                          </p>
+                          <p className="card-text fw-bold">
+                            {exam.studentCount ?? "—"}
+                          </p>
+                        </div>
+
+                        <div className="d-flex btn-group justify-content-center align-items-center">
+                          <Button
+                            type="button"
+                            variant="btn btn-sm btn-outline-primary"
+                            className="confirm-button"
+                            onClick={() => handleShowEdit(exam)}
+                          >
+                            Chỉnh sửa
+                          </Button>
+                          <button
+                            type="button"
+                            className="cancel-button btn btn-sm btn-outline-danger"
+                          >
+                            Xóa
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <EditExam
         show={showEditExam && !!selectedExam}
         onClose={handleCloseEdit}

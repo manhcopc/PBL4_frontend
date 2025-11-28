@@ -83,79 +83,82 @@ export default function ScoreModule() {
           <div className="container">
             <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
               {exams.map((exam) => (
-                  <div className="col" key={exam.id}>
+                <div className="col" key={exam.id}>
+                  <div
+                    style={{
+                      borderRadius: "1rem",
+                    }}
+                    className="card"
+                  >
+                    <div
+                      className="text-white card-header piosition-relative"
+                      style={{
+                        backgroundColor: "#1C59A1",
+                        borderRadius: "1rem 1rem 0 0",
+                      }}
+                    >
+                      <h3 className="position-absolute">#{exam.id}</h3>
+                      <h3 className="text-center">{exam.name}</h3>
+                    </div>
+
                     <div
                       style={{
-                        borderRadius: "1rem",
+                        boxShadow:
+                          " -2px 1px 15px 0px rgba(152, 182, 246, 0.97), inset 2px -1px 15px 0px rgba(158, 142, 142, 0.33)",
+                        borderRadius: "0 0 1rem 1rem",
                       }}
-                      className="card"
+                      className="card-body "
                     >
-                      <div
-                        className="text-white card-header"
-                        style={{
-                          borderRadius: "1rem 1rem 0 0",
-                          backgroundColor: "#1C59A1",
-                        }}
-                      >
-                        <h3 className="mx-auto my-auto mt-2 text-white text-center mb-2">
-                          {exam.name}
-                        </h3>
+                      <p className="d-block card-subtitle mb-2 text-body-secondary ">
+                        {exam.description || "Không có mô tả"}
+                      </p>
+                      <div className="d-flex align-item-center justify-content-between mx-3">
+                        <p className="card-text fw-bold">Môn học:</p>
+                        <p className="card-text fw-bold">{exam.subject}</p>
+                      </div>
+                      <div className="d-flex align-item-center justify-content-between mx-3">
+                        <p className="card-text fw-bold">Ngày thi:</p>
+                        <p className="card-text fw-bold">
+                          {formatDate(exam.examDate)}
+                        </p>
+                      </div>
+                      <div className="d-flex align-item-center justify-content-between mx-3">
+                        <p className="card-text fw-bold">Số câu hỏi:</p>
+                        <p className="card-text fw-bold">
+                          {exam.questionCount || "—"}
+                        </p>
+                      </div>
+                      <div className="d-flex align-item-center justify-content-between mx-3">
+                        <p className="card-text fw-bold">Số mã đề:</p>
+                        <p className="card-text fw-bold">
+                          {exam.paperCount || "—"}
+                        </p>
+                      </div>
+                      <div className="d-flex align-item-center justify-content-between mx-3">
+                        <p className="card-text fw-bold">Số thí sinh:</p>
+                        <p className="card-text fw-bold">
+                          {exam.studentCount || "—"}
+                        </p>
                       </div>
 
-                      <div
-                        style={{
-                          boxShadow:
-                            " -2px 1px 15px 0px rgba(152, 182, 246, 0.97), inset 2px -1px 15px 0px rgba(158, 142, 142, 0.33)",
-                          borderRadius: "0 0 1rem 1rem",
-                        }}
-                        className="card-body "
-                      >
-                        <p className="d-block card-subtitle mb-2 text-body-secondary ">
-                          {exam.description || "Không có mô tả"}
-                        </p>
-                        <div className="d-flex align-item-center justify-content-between mx-3">
-                          <p className="card-text fw-bold">Môn học:</p>
-                          <p className="card-text fw-bold">{exam.subject}</p>
-                        </div>
-                        <div className="d-flex align-item-center justify-content-between mx-3">
-                          <p className="card-text fw-bold">Ngày thi:</p>
-                          <p className="card-text fw-bold">{formatDate(exam.examDate)}</p>
-                        </div>
-                        <div className="d-flex align-item-center justify-content-between mx-3">
-                          <p className="card-text fw-bold">Số câu hỏi:</p>
-                          <p className="card-text fw-bold">{exam.questionCount || "—"}</p>
-                        </div>
-                        <div className="d-flex align-item-center justify-content-between mx-3">
-                          <p className="card-text fw-bold">Số mã đề:</p>
-                          <p className="card-text fw-bold">{exam.paperCount || "—"}</p>
-                        </div>
-                        <div className="d-flex align-item-center justify-content-between mx-3">
-                          <p className="card-text fw-bold">Số thí sinh:</p>
-                          <p className="card-text fw-bold">{exam.studentCount || "—"}</p>
-                        </div>
-
-                        <div className="mt-4 text-center">
-                          <Button
-                            variant="outline-primary"
-                            onClick={() => handleOpenDetail(exam)}
-                          >
-                            Xem chi tiết
-                          </Button>
-                        </div>
+                      <div className="mt-4 text-center">
+                        <Button
+                          variant="outline-primary"
+                          onClick={() => handleOpenDetail(exam)}
+                        >
+                          Xem chi tiết
+                        </Button>
                       </div>
                     </div>
                   </div>
+                </div>
               ))}
             </div>
           </div>
         </div>
       )}
 
-      <Detail
-        show={showModal}
-        onClose={handleCloseModal}
-        exam={selectedExam}
-      />
+      <Detail show={showModal} onClose={handleCloseModal} exam={selectedExam} />
     </>
   );
 }

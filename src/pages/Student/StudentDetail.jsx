@@ -120,12 +120,12 @@ function StudentDetail({ show, onClose, data }) {
                       Ngày thi: {formatDate(exam.takenAt)}
                     </p>
                     <div className="d-flex justify-content-between">
-                      <div className="text-center flex-fill">
+                      {/* <div className="text-center flex-fill">
                         <p className="fw-bold text-black mb-1">Số câu đúng</p>
                         <h4 className="text-success fs-5 mb-0">
                           {exam.correctCount} / {exam.totalQuestions}
                         </h4>
-                      </div>
+                      </div> */}
                       <div className="text-center flex-fill">
                         <p className="fw-bold text-black mb-1">Điểm</p>
                         <h4 className="text-primary fw-bold mb-0">
