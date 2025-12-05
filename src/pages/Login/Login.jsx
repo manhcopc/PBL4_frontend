@@ -157,86 +157,77 @@ export default function Login() {
       }}
       className="d-flex form-signin w-100 m-auto"
     >
-      <form
-        className="w-50 m-auto"
-        style={{
-          padding: "1.5rem",
-          maxWidth: "360px",
-          backgroundColor: "white",
-          borderRadius: "8px",
-        }}
-        onSubmit={handleSubmit}
-      >
-        <h1
-          style={{ textTransform: "uppercase", fontWeight: "bold" }}
-          className="d-flex justify-content-center h3 mb-3 fw-normal"
+      {!showResetForm && (
+        <form
+          className="w-50 m-auto"
+          style={{
+            padding: "1.5rem",
+            maxWidth: "360px",
+            backgroundColor: "white",
+            borderRadius: "8px",
+          }}
+          onSubmit={handleSubmit}
         >
-          Log in
-        </h1>
-        <div className="form-floating mb-2">
-          <input
-            type="text"
-            className="form-control"
-            id="floatingInput"
-            name="username"
-            placeholder="Tên đăng nhập"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="floatingInput">Tên đăng nhập</label>
-        </div>
-        <div className="form-floating mb-3">
-          <input
-            type="password"
-            className="form-control"
-            id="floatingPassword"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="floatingPassword">Password</label>
-        </div>
-        {error && (
-          <div className="alert alert-danger py-2" role="alert">
-            {error}
+          <h1
+            style={{ textTransform: "uppercase", fontWeight: "bold" }}
+            className="d-flex justify-content-center h3 mb-3 fw-normal"
+          >
+            Log in
+          </h1>
+          <div className="form-floating mb-2">
+            <input
+              type="text"
+              className="form-control"
+              id="floatingInput"
+              name="username"
+              placeholder="Tên đăng nhập"
+              value={form.username}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="floatingInput">Tên đăng nhập</label>
           </div>
-        )}
-        <button
-          type="button"
-          className="btn btn-link p-0"
-          onClick={() => {
-            setShowResetForm((prev) => !prev);
-            setResetMessage({ type: "", text: "" });
-          }}
-        >
-          Quên mật khẩu?
-        </button>
-        <button
-          className="btn btn-primary w-100 py-2"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Đang đăng nhập..." : "Sign in"}
-        </button>
-      </form>
-      <div className="text-center mt-3">
-        {/* <button
-          type="button"
-          className="btn btn-link p-0"
-          onClick={() => {
-            setShowResetForm((prev) => !prev);
-            setResetMessage({ type: "", text: "" });
-          }}
-        >
-          Quên mật khẩu?
-        </button> */}
-      </div>
+          <div className="form-floating mb-3">
+            <input
+              type="password"
+              className="form-control"
+              id="floatingPassword"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="floatingPassword">Password</label>
+          </div>
+          {error && (
+            <div className="alert alert-danger py-2" role="alert">
+              {error}
+            </div>
+          )}
+          <button
+            type="button"
+            className="btn btn-link p-0"
+            onClick={() => {
+              setShowResetForm((prev) => !prev);
+              setResetMessage({ type: "", text: "" });
+            }}
+          >
+            Quên mật khẩu?
+          </button>
+          <button
+            className="btn btn-primary w-100 py-2"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Đang đăng nhập..." : "Sign in"}
+          </button>
+        </form>
+      )}
+
       {showResetForm && (
         <div className="mt-4 border rounded p-3 bg-light">
-          <h5 className="mb-3">Đặt lại mật khẩu</h5>
+          <h5 className="mb-3 text-center">Đặt lại mật khẩu</h5>
           <Form.Group className="mb-3">
             <Form.Label>Email đã đăng ký</Form.Label>
             <Form.Control
@@ -250,7 +241,7 @@ export default function Login() {
           </Form.Group>
           <div className="d-flex gap-2 mb-3">
             <Button
-              variant="secondary"
+              variant="secondary mx-auto"
               type="button"
               onClick={handleSendOtp}
               disabled={isSendingOtp}
@@ -308,6 +299,17 @@ export default function Login() {
               {resetMessage.text}
             </div>
           )}
+          <div className="d-flex align-item-center">
+            <Button
+              onClick={() => {
+                setShowResetForm(false);
+              }}
+              variant="transparent text-center align-item-center"
+              style={{ textColor: "red" }}
+            >
+              Quay lại
+            </Button>
+          </div>
         </div>
       )}
     </main>
