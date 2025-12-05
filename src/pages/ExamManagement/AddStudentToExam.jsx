@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Form, Table, Button, Modal, Spinner } from "react-bootstrap";
-import examManagementService from "../../application/examManagement";
+import examManagementService from "../../service/examManagement/";
 
 export default function AddStudentToExam({
   show,

@@ -1,4 +1,4 @@
-import createStudentRepository from "../../infrastructure/student/studentRepository";
+import createStudentRepository from "../../repository/student/studentRepository";
 
 const studentRepository = createStudentRepository();
 

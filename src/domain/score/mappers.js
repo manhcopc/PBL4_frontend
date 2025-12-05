@@ -19,7 +19,10 @@ export const mapScoreRecord = (record = {}, index = 0) => {
     record.correct_count ?? record.correctCount ?? record.correct ?? 0;
   const score =
     record.score ?? record.total_score ?? record.totalScore ?? record.mark ?? 0;
-
+  // const examineeId = typeof record.examinee === "object" ? examinee.id : record.examinee;
+  const paperCodeRaw = record.exam_paper?.code || record.exam_paper_code || record.paper_code;
+  // Nếu vẫn null, dùng ID của kỳ thi (record.exam)
+  const fallbackPaperCode = paperCodeRaw ? paperCodeRaw :   "—";
   return createScoreRecord({
     recordId: record.id ?? record.record_id ?? null,
     examineeId:
@@ -32,15 +35,10 @@ export const mapScoreRecord = (record = {}, index = 0) => {
       examinee.student_ID ??
       record.student_ID ??
       record.examinee_code ??
-      examinee.code ??
-      `SV-${index + 1}`,
+      examinee.code ,
+      // ?? `SV-${index + 1}`,
     fullName: examinee.name ?? record.name ?? `Thí sinh ${index + 1}`,
-    paperCode:
-      examPaper.exam_paper_code ??
-      examPaper.code ??
-      record.exam_paper_code ??
-      record.paper_code ??
-      "—",
+    paperCode: fallbackPaperCode,
     correctCount: Number(correctCount) || 0,
     score: Number(score) || 0,
     pendingImage:
@@ -66,6 +64,6 @@ export const enrichScoreRecords = (records, detailMap) =>
       ...record,
       studentCode: record.studentCode || detail.student_ID,
       fullName: detail.name ?? record.fullName,
-      paperCode: record.paperCode,
+      paperCode: record.paperCode || record.exam_paper_code
     });
   });

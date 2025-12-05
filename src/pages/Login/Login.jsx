@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import authService from "../../application/auth";
+import authService from "../../service/auth";
 import { Form, Button } from "react-bootstrap";
 
 export default function Login() {

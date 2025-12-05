@@ -1,8 +1,6 @@
 import { Modal, Table, Button, Row, Col, Form, Spinner } from "react-bootstrap";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import scoreManagementService from "../../application/scoreManagement";
-import ImageWithLightbox from "../../components/shared/item/ImageWithLightBox";
-import ImageLightboxPortal from "../../components/shared/item/ImageLightBoxPortal";
+import scoreManagementService from "../../service/scoreManagement";
 import Portal from "../../components/shared/item/Portal";
 import "../../assets/Share.css";
 export default function Detail({ show, onClose, exam }) {
@@ -17,36 +15,30 @@ export default function Detail({ show, onClose, exam }) {
 const openZoom = (src) => setZoomImage(src);
 const closeZoom = () => setZoomImage(null);
 
-
-  const examId = exam?.id;
-  const totalQuestions = exam?.questionCount || 0;
+const examId = exam?.id;
 
   const fetchRecords = useCallback(async () => {
     if (!examId) return;
     setIsLoading(true);
-    setErrorMessage("");
     try {
       const list = await scoreManagementService.getExamRecords(examId);
-      const normalized = list.map((record) => ({
-        ...record,
-        pendingImageUpload: null,
-        gradedImageUpload: null,
+      const deepCopyForOriginal = JSON.parse(JSON.stringify(list));
+
+      setOriginalRecords(deepCopyForOriginal);
+      const uiData = list.map((r) => ({
+        ...r,
+        pendingImageUpload: null, 
+        gradedImageUpload: null, 
       }));
-      setRecords(normalized);
-      setOriginalRecords(
-        normalized.map((record) => ({
-          ...record,
-        }))
-      );
+      setRecords(uiData);
     } catch (error) {
-      console.error("Không thể tải danh sách bài thi", error);
-      setErrorMessage("Không thể tải danh sách bài làm.");
-      setRecords([]);
-      setOriginalRecords([]);
+      console.error("Lỗi tải data:", error);
+      alert("Không thể tải danh sách bài làm.");
     } finally {
       setIsLoading(false);
     }
   }, [examId]);
+    const totalQuestions = exam?.questionCount || 0;
 
   useEffect(() => {
     if (show && examId) {
@@ -54,95 +46,63 @@ const closeZoom = () => setZoomImage(null);
     } else if (!show) {
       setRecords([]);
       setOriginalRecords([]);
-      setErrorMessage("");
-      setIsLoading(false);
     }
   }, [show, examId, fetchRecords]);
-
   const handleChange = (recordId, field, value) => {
     setRecords((prev) =>
-      prev.map((record) =>
-        record.recordId === recordId
-          ? {
-              ...record,
-              [field]: field === "score" ? Number(value) : Number.parseInt(value, 10) || 0,
-            }
-          : record
-      )
+      prev.map((record) => {
+        if (record.recordId !== recordId) return record;
+        let parsedVal = 0;
+        if (field === "score") parsedVal = parseFloat(value) || 0;
+        else parsedVal = parseInt(value, 10) || 0;
+
+        return { ...record, [field]: parsedVal };
+      })
     );
   };
-
-  const averageScore = useMemo(() => {
-    if (!records.length) return 0;
-    const sum = records.reduce((acc, record) => acc + (Number(record.score) || 0), 0);
-    return (sum / records.length).toFixed(2);
-  }, [records]);
-
-  const totalStudents = records.length;
-
-  const handleImageChange = (recordId, field, file) => {
-    if (!file) {
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result;
-      setRecords((prev) =>
-        prev.map((record) =>
-          record.recordId === recordId
-            ? {
-                ...record,
-                [field]: result,
-                [`${field}Upload`]: result,
-              }
-            : record
-        )
+    const averageScore = useMemo(() => {
+      if (!records.length) return 0;
+      const sum = records.reduce(
+        (acc, record) => acc + (Number(record.score) || 0),
+        0
       );
-    };
-    reader.readAsDataURL(file);
-  };
+      return (sum / records.length).toFixed(2);
+    }, [records]);
+      const totalStudents = records.length;
 
   const handleSave = async () => {
     if (!examId || !records.length) {
       onClose?.();
       return;
     }
-    const changedRecords = records.filter((record) => {
-      const original = originalRecords.find((item) => item.recordId === record.recordId);
-      if (!original) return true;
-      return (
-        original.correctCount !== record.correctCount ||
-        original.score !== record.score ||
-        original.pendingImage !== record.pendingImage ||
-        original.gradedImage !== record.gradedImage
-      );
-    });
-
-    if (changedRecords.length === 0) {
-      onClose?.();
-      return;
-    }
 
     setIsSaving(true);
     try {
-      await scoreManagementService.saveExamRecords({
+      const result = await scoreManagementService.saveExamRecords({
         examId,
         updatedRecords: records,
         originalRecords,
       });
-      await fetchRecords();
-      onClose?.();
-    } catch (error) {
-      console.error("Không thể lưu kết quả bài thi", error);
-      alert("Không thể lưu kết quả bài thi. Vui lòng thử lại.");
-    } finally {
-      setIsSaving(false);
-    }
+      if (result.failed > 0) {
+        alert(
+          `Lưu hoàn tất nhưng có ${result.failed} bản ghi bị lỗi. Vui lòng kiểm tra lại.`
+        );
+        await fetchRecords();
+      } else if (result.success > 0) {
+        alert("Lưu thành công tất cả!");
+        onClose?.();
+      } else {
+        onClose?.();
+      }
+      } catch (error) {
+        console.error("Lỗi hệ thống:", error);
+        alert("Có lỗi xảy ra khi lưu.");
+      } finally {
+        setIsSaving(false);
+      }
   };
 
-  if (!examId || !exam) {
-    return null;
-  }
+  if (!show) return null;
 
 
 
@@ -158,7 +118,8 @@ const closeZoom = () => setZoomImage(null);
           >
             <img
               src={zoomImage}
-              className="h-full w-auto rounded shadow-lg"
+              className="rounded shadow-lg"
+              style={{ maxHeight: "90%", maxWidth: "90%" }}
               onClick={(e) => e.stopPropagation()}
             />
 
@@ -212,10 +173,8 @@ const closeZoom = () => setZoomImage(null);
                   <thead className="table-light">
                     <tr>
                       <th>#</th>
-                      {/* <th>Mã SV</th> */}
+                      <th>Mã SV</th>
                       <th>Họ tên</th>
-                      {/* <th>Mã đề</th> */}
-                      {/* <th>Số câu đúng</th> */}
                       <th>Điểm</th>
                       <th>Bài thi chưa chấm</th>
                       <th>Bài thi đã chấm</th>
@@ -232,24 +191,8 @@ const closeZoom = () => setZoomImage(null);
                       records.map((record, index) => (
                         <tr key={record.recordId}>
                           <td>{index + 1}</td>
-                          {/* <td>{record.studentCode}</td> */}
+                          <td>{record.studentCode}</td>
                           <td>{record.fullName}</td>
-                          {/* <td>{record.paperCode}</td> */}
-                          {/* <td style={{ width: "150px" }}>
-                            <Form.Control
-                              type="number"
-                              min="0"
-                              max={totalQuestions || undefined}
-                              value={record.correctCount}
-                              onChange={(e) =>
-                                handleChange(
-                                  record.recordId,
-                                  "correctCount",
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </td> */}
                           <td style={{ width: "150px" }}>
                             <Form.Control
                               type="number"

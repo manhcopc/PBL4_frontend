@@ -15,8 +15,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import CreateExam from "./CreateExam";
 import EditExam from "./EditExam";
 import "../../assets/Share.css"
-import examApi from "../../services/api/examApi";
-import examManagementService from "../../application/examManagement";
+import examApi from "../../api/examApi";
+import examManagementService from "../../service/examManagement/";
 const ExamModule = () => {
   const [showCreateExam, setShowCreateExam] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -36,6 +36,19 @@ const ExamModule = () => {
     setShowEditExam(false);
     setSelectedExam(null);
   };
+  const handlerDeleteExam = async (examId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa đề thi này không?")) {
+      return;
+    }
+    try {
+      await examApi.deleteExam(examId);
+      alert("Đã xóa đề thi thành công!");
+      fetchExams();
+    } catch (error) {
+      console.error("Lỗi xóa đề thi:", error);
+      alert("Không thể xóa đề thi!");
+    }
+  }
   
   const fetchExams = async () => {
     setIsLoading(true);
@@ -172,8 +185,8 @@ const ExamModule = () => {
                           borderRadius: "1rem 1rem 0 0",
                         }}
                       >
-                        <h3 className="position-absolute">#{exam.id}</h3>
-                        <h3 className="text-center">{exam.name}</h3>
+                        <h3 className="position-absolute" style={{ top: "0", left: "1"}}>#{exam.id}</h3>
+                        <h3 className="text-center px-5">{exam.name}</h3>
                       </div>
 
                       <div
@@ -229,6 +242,7 @@ const ExamModule = () => {
                           <button
                             type="button"
                             className="cancel-button btn btn-sm btn-outline-danger"
+                            onClick={() => handlerDeleteExam(exam.id)}
                           >
                             Xóa
                           </button>

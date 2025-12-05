@@ -9,7 +9,7 @@ import {
   Col,
   Card,
 } from "react-bootstrap";
-import examApi from "../../services/api/examApi";
+import examApi from "../../api/examApi";
 export default function CreateExam({ show, onClose, onSuccess }) {
   const [form, setForm] = useState({
     name: "",

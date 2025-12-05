@@ -1,7 +1,7 @@
-import examApi from "../../services/api/examApi";
-import examPaperApi from "../../services/api/examPaperApi";
-import examineeRecordApi from "../../services/api/examineeRecordApi";
-import examineeApi from "../../services/api/examineeApi";
+import examApi from "../../api/examApi";
+import examPaperApi from "../../api/examPaperApi";
+import examineeRecordApi from "../../api/examineeRecordApi";
+import examineeApi from "../../api/examineeApi";
 import {
   enrichScoreRecords,
   mapExamSummaryResponse,
@@ -25,25 +25,23 @@ const collectMissingDetails = (records) =>
   );
 
 const fetchDetailMap = async (records) => {
-  const ids = collectMissingDetails(records);
-  if (!ids.length) return new Map();
+  const missingIds = collectMissingDetails(records);
+  if (!missingIds.length) return new Map();
 
-  const detailPairs = await Promise.all(
-    ids.map((id) =>
-      examineeApi
-        .getExamineeById(id)
-        .then((res) => ({ id, detail: res.data }))
-        .catch(() => ({ id, detail: null }))
-    )
-  );
-
-  const map = new Map();
-  detailPairs.forEach(({ id, detail }) => {
-    if (detail) {
-      map.set(id, detail);
-    }
-  });
-  return map;
+  try {
+    const res = await examineeApi.getAllExaminees(); 
+    const allStudents = Array.isArray(res.data) ? res.data : [];
+    const map = new Map();
+    allStudents.forEach(student => {
+      if (missingIds.includes(student.id)) {
+        map.set(student.id, student);
+      }
+    });
+    return map;
+  } catch (error) {
+    console.error("Failed to fetch student details", error);
+    return new Map();
+  }
 };
 
 const pickImageValue = (recordValue, uploadValue) => {

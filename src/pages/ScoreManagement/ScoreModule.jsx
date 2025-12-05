@@ -2,7 +2,7 @@ import { Row, Col, Button, Form, Spinner } from "react-bootstrap";
 import Detail from "./Detail";
 import { useEffect, useState } from "react";
 import "../../assets/Share.css";
-import scoreManagementService from "../../application/scoreManagement";
+import scoreManagementService from "../../service/scoreManagement";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -97,8 +97,8 @@ export default function ScoreModule() {
                         borderRadius: "1rem 1rem 0 0",
                       }}
                     >
-                      <h3 className="position-absolute">#{exam.id}</h3>
-                      <h3 className="text-center">{exam.name}</h3>
+                      <h3 className="position-absolute" style={{ top: "0", left: "1"}}>#{exam.id}</h3>
+                      <h3 className="text-center px-4">{exam.name}</h3>
                     </div>
 
                     <div

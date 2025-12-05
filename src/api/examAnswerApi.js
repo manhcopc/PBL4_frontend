@@ -1,4 +1,4 @@
-import api from "../api";
+import api from "./api";
 const paperAnswerApi = {
     addAnswer: (paperId, data) =>
         api.post(`/ExamPapers/${paperId}/Answers/`, data),

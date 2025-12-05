@@ -1,4 +1,4 @@
-import api from "../api";
+import api from "./api";
 const examineeRecordApi = {
     addRecord: (examId, data) =>
         api.post(`/Exams/${examId}/ExamineeRecords/`, data),

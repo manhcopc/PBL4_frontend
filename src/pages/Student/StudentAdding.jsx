@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Button, Container, Modal } from "react-bootstrap";
-import studentService from "../../application/studentManagement";
+import studentService from "../../service/studentManagement";
 
 function StudentAdding({ show, onClose, data, onSuccess }) {
   const isEdit = !!data;

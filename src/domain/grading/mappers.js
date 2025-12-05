@@ -68,22 +68,32 @@ export const enrichRecordsWithDetails = (records, detailMap) =>
 
 export const mapProcessingResponse = (payload = {}) =>
   createProcessedResult({
-    recordId: payload.record_id ?? payload.recordId ?? payload.id ?? null,
-    sbd: payload.sbd ?? payload.examinee_code ?? "",
-    made: payload.made ?? payload.exam_code ?? "",
-    answers: payload.answers ?? {},
-    examPaperCode: payload.exam_paper_code ?? payload.made ?? "",
+    recordId:
+      payload.record_id ?? payload.recordId ?? payload.id ?? null,
+    sbd:
+      payload.sbd ?? payload.examinee_code ?? "",
+    made:
+      payload.made ?? payload.exam_code ?? "",
+    answers:
+      payload.answers ?? {},
+    examPaperCode:
+      payload.exam_paper_code ?? payload.made ?? "",
     totalQuestions:
       payload.total_questions ?? payload.totalQuestions ?? payload.question_count ?? 0,
     correctAnswers:
       payload.correct_answers ?? payload.correctAnswers ?? payload.correct ?? 0,
-    score: payload.score ?? payload.total_score ?? payload.mark ?? 0,
+    score:
+      payload.score ?? payload.total_score ?? payload.mark ?? 0,
     details: mapDetailEntries(
       payload.details ??
         payload.result?.details ??
         payload.answer_details ??
         []
     ),
+    originalImage: payload.original_image ?? null, // Map original image
+    originalImageName: payload.original_image_name ?? null, // Map original image name
+    processedImage: payload.processed_image ?? null, // Map processed image
+    processedImageName: payload.processed_image_name ?? null, // Map processed image name
   });
 
 export const mapRecordResultResponse = (payload = {}) =>

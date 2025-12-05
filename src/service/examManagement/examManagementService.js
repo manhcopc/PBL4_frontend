@@ -1,5 +1,5 @@
 import { createExam } from "../../domain/exam/models";
-import createExamRepository from "../../infrastructure/exam/examRepository";
+import createExamRepository from "../../repository/exam/examRepository";
 
 const examRepository = createExamRepository();
 

@@ -1,4 +1,4 @@
-import api from "../api";
+import api from "./api";
 
 const examApi = {
     addExam: (data) => api.post("/Exams/", data),

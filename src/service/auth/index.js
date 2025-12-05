@@ -1,4 +1,4 @@
-import createAuthRepository from "../../infrastructure/auth/authRepository";
+import createAuthRepository from "../../repository/auth/authRepository";
 import createAuthService from "./authService";
 
 const authRepository = createAuthRepository();

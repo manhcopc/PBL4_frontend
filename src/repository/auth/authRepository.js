@@ -1,5 +1,5 @@
 import axios from "axios";
-import api from "../../services/api";
+import api from "../../api/api";
 
 const API_URL = "/api";
 const publicClient = axios.create({

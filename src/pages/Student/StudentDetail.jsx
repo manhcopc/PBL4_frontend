@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Container, Modal, Row, Col, Card, Button, Spinner } from "react-bootstrap";
-import studentService from "../../application/studentManagement";
+import studentService from "../../service/studentManagement";
 
 function StudentDetail({ show, onClose, data }) {
   const [studentDetail, setStudentDetail] = useState(null);
@@ -114,9 +114,9 @@ function StudentDetail({ show, onClose, data }) {
               <Col className="col-md-6 mb-3" key={exam.examId || exam.examCode}>
                 <Card className="mt-4 border-0 shadow-sm h-100">
                   <Card.Body>
-                    <h5 className="fw-bold text-primary">{exam.examName}</h5>
-                    <p className="text-secondary mb-2">Mã đề: {exam.examCode}</p>
-                    <p className="mb-2 text-dark">
+                    <h5 className="fw-bold text-primary text-center">{exam.examName}</h5>
+                    {/* <p className="text-secondary mb-2">Mã đề: {exam.examCode}</p> */}
+                    <p className="mb-2 text-dark text-center">
                       Ngày thi: {formatDate(exam.takenAt)}
                     </p>
                     <div className="d-flex justify-content-between">

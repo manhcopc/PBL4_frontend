@@ -2,7 +2,7 @@ import { Table, Button, Container, Form, Row, Col } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import StudentAdding from "./StudentAdding.jsx";
 import StudentDetail from "./StudentDetail.jsx";
-import studentService from "../../application/studentManagement";
+import studentService from "../../service/studentManagement";
 function StudentModule() {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -38,8 +38,10 @@ function StudentModule() {
 
 
   return (
-    <Container className="mx-auto">
-      <h1 style={{ color: "#1C59A1" }}>Danh sách sinh viên lớp </h1>
+    <>
+      <h1 className="mx-auto" style={{ color: "#1C59A1" }}>
+        Danh sách sinh viên lớp{" "}
+      </h1>
       <Form onSubmit={(e) => e.preventDefault()}>
         <Row>
           <Col>
@@ -130,7 +132,7 @@ function StudentModule() {
           />
         </tbody>
       </Table>
-    </Container>
+    </>
   );
 }
 

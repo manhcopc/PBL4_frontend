@@ -3,7 +3,7 @@ import { BiSolidDetail } from "react-icons/bi";
 import { FaList } from "react-icons/fa";
 import { Tab, Nav, Form, Table, Button, Modal, Row, Col, Card, Spinner } from "react-bootstrap";
 import "../../assets/NavbarHover.css";
-import examManagementService from "../../application/examManagement";
+import examManagementService from "../../service/examManagement/";
 import AddStudentToExam from "./AddStudentToExam";
 
 const SUBJECT_OPTIONS = ["Toán", "Ngữ Văn", "Tiếng Anh", "Vật Lý", "Hóa Học"];

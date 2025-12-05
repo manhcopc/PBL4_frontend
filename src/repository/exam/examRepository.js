@@ -1,8 +1,8 @@
-import examApi from "../../services/api/examApi";
-import examPaperApi from "../../services/api/examPaperApi";
-import examAnswerApi from "../../services/api/examAnswerApi";
-import examineeRecordApi from "../../services/api/examineeRecordApi";
-import examineeApi from "../../services/api/examineeApi";
+import examApi from "../../api/examApi";
+import examPaperApi from "../../api/examPaperApi";
+import examAnswerApi from "../../api/examAnswerApi";
+import examineeRecordApi from "../../api/examineeRecordApi";
+import examineeApi from "../../api/examineeApi";
 import {
   createExamPaper,
   createExamStudent,

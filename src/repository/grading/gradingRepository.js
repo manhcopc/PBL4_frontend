@@ -1,7 +1,7 @@
-import cameraApi from "../../services/api/cameraApi";
-import gradingApi from "../../services/api/gradingApi";
-import examineeRecordApi from "../../services/api/examineeRecordApi";
-import examineeApi from "../../services/api/examineeApi";
+import cameraApi from "../../api/cameraApi";
+import gradingApi from "../../api/gradingApi";
+import examineeRecordApi from "../../api/examineeRecordApi";
+import examineeApi from "../../api/examineeApi";
 import {
   enrichRecordsWithDetails,
   mapProcessingResponse,
@@ -52,7 +52,10 @@ const fetchMissingDetails = async (records) => {
 export default function createGradingRepository() {
   return {
     async fetchCameraFrame() {
-      const res = await cameraApi.getCameraStream();
+      return "/api/CameraStream/TMDB-00001/";
+    },
+    async fetchCameraSnapshot() {
+      const res = await cameraApi.getImage();
       return res.data;
     },
     async listRecords(examId) {
@@ -75,7 +78,7 @@ export default function createGradingRepository() {
       const res = await gradingApi.imageProcess(formData);
       return mapProcessingResponse(res.data || {});
     },
-    saveResult(payload) {
+    async saveResult(payload) {
       return gradingApi.imageProcessSave(payload);
     },
     async fetchRecordResult(recordId) {

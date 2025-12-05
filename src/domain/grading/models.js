@@ -18,4 +18,8 @@ export const createProcessedResult = (props = {}) => ({
   correctAnswers: props.correctAnswers ?? 0,
   score: props.score ?? 0,
   details: props.details ?? [],
+  originalImage: props.originalImage ?? null, // New field for original image
+  originalImageName: props.originalImageName ?? null, // New field for original image name
+  processedImage: props.processedImage ?? null, // New field for processed image
+  processedImageName: props.processedImageName ?? null, // New field for processed image name
 });

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Button, Container, Alert, Spinner } from "react-bootstrap";
-import authService from "../../application/auth";
+import authService from "../../service/auth";
 
 function ChangePassword() {
   const [form, setForm] = useState({

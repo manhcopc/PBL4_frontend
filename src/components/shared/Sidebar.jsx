@@ -13,7 +13,8 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../assets/NavbarHover.css"
 import { useNavigate } from "react-router-dom";
-import authService from "../../application/auth";
+import authService from "../../service/auth";
+import logo from "../../assets/logo.png";
 
 // const Sidebar = () => {
 //   const location = useLocation();
@@ -40,12 +41,13 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
       <span className="d-flex flex-column align-items-center mt-4">
         <img
           className="img-fluid rounded bg-light p-1"
-          src="https://i.pravatar.cc/200?img=12"
-          alt="Teacher Avatar"
+          src={logo}
+          alt="Logo"
           style={{ maxWidth: "100px", borderRadius: "100%" }}
         />
-        <h2 className="d-block text-center mt-2 text-white">Tên giáo viên</h2>
+        {/* <h2 className="d-block text-center mt-2 text-white">Tên giáo viên</h2> */}
       </span>
+      {/* <img src={logo} width="40" className="me-2" alt="logo" /> */}
 
       <hr />
       <Nav
