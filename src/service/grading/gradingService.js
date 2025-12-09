@@ -17,13 +17,16 @@ export default function createGradingService() {
     fetchCameraStreamUrl() {
       return gradingRepository.fetchCameraFrame();
     },
+    
     fetchCameraSnapshot() {
       return gradingRepository.fetchCameraSnapshot();
     },
+    
     listRecords(examId) {
-      if (!examId) return [];
+      if (!examId) return Promise.resolve([]);
       return gradingRepository.listRecords(examId);
     },
+    
     async processImage({ file }) {
       if (!file) {
         throw new Error("Thiếu ảnh để chấm bài thi.");
@@ -31,36 +34,35 @@ export default function createGradingService() {
       const normalizedFile = ensureFileObject(file);
       return gradingRepository.processImage(normalizedFile);
     },
+    
     async saveResult({ exam, result }) {
       try {
-        if (!exam) {
-          throw new Error("Exam data is missing or undefined.");
-        }
+        if (!exam) throw new Error("Thiếu ID kỳ thi (exam).");
+        if (!result) throw new Error("Thiếu kết quả chấm (result).");
         const payload = {
-          exam,
+          exam: exam,
           result: {
-            sbd: result.sbd,
-            made: result.made, 
-            answers: result.answers,
-            original_image: result.originalImage || null, 
-            original_image_name: result.originalImageName || null, 
-            processed_image: result.processedImage || null, 
-            processed_image_name: result.processedImageName || null, 
+            sbd: result.sbd || "",
+            made: result.made || "",
+            answers: result.answers || {}, 
+            
+            original_image: result.originalImage || null,
+            original_image_name: result.originalImageName || null,
+            processed_image: result.processedImage || null,
+            processed_image_name: result.processedImageName || null,
           },
         };
 
-        console.log("Payload gửi đến API:", payload);
-
         const response = await gradingRepository.saveResult(payload);
-        console.log("Phản hồi từ API:", response);
         return response;
       } catch (error) {
-        console.error("Lỗi từ API:", error.response?.data || error.message);
+        console.error("Lỗi saveResult Service:", error);
         throw error;
       }
     },
+    
     fetchRecordResult(recordId) {
-      if (!recordId) return null;
+      if (!recordId) return Promise.resolve(null);
       return gradingRepository.fetchRecordResult(recordId);
     },
   };

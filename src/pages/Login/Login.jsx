@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import authService from "../../service/auth";
 import { Form, Button } from "react-bootstrap";
+import cover from "../../assets/Bút chì gỗ.jpeg";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [registered, setRegistered] = useState(false);
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,25 +156,33 @@ export default function Login() {
         alignItems: "center",
         height: "100vh",
         margin: "0 auto",
+        backgroundImage: `url(${cover})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
       className="d-flex form-signin w-100 m-auto"
     >
-      {!showResetForm && (
+      {!showResetForm && !registered && (
         <form
-          className="w-50 m-auto"
+          className="w-50 m-auto mx-0"
           style={{
+            backgroundColor: "rgba(255, 255, 255, 0.8)",
             padding: "1.5rem",
             maxWidth: "360px",
-            backgroundColor: "white",
+            // backgroundColor: "white",
             borderRadius: "8px",
           }}
           onSubmit={handleSubmit}
         >
           <h1
-            style={{ textTransform: "uppercase", fontWeight: "bold" }}
+            style={{
+              textTransform: "uppercase",
+              fontWeight: "bold",
+              color: "#1C59A1",
+            }}
             className="d-flex justify-content-center h3 mb-3 fw-normal"
           >
-            Log in
+            Đăng nhập
           </h1>
           <div className="form-floating mb-2">
             <input
@@ -198,7 +208,7 @@ export default function Login() {
               onChange={handleChange}
               required
             />
-            <label htmlFor="floatingPassword">Password</label>
+            <label htmlFor="floatingPassword">Mật khẩu</label>
           </div>
           {error && (
             <div className="alert alert-danger py-2" role="alert">
@@ -218,15 +228,150 @@ export default function Login() {
           <button
             className="btn btn-primary w-100 py-2"
             type="submit"
+            style={{ backgroundColor: "#1C59A1", borderColor: "#1C59A1" }}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Đang đăng nhập..." : "Sign in"}
+            {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
+          <hr />
+          <div className="text-center">
+            <span className="text-muted small">Chưa có tài khoản? </span>
+            <button
+              type="button"
+              className="btn btn-link p-0 text-decoration-none"
+              style={{ fontWeight: "600", color: "#1C59A1" }}
+              onClick={() => {
+                setRegistered(true);
+              }}
+            >
+              Đăng ký ngay
+            </button>
+          </div>
         </form>
       )}
+      {registered && (
+        <form
+          className="w-100 m-auto" // Đổi w-50 thành w-100 để responsive tốt hơn trong container nhỏ, max-width sẽ lo phần giới hạn
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.8)", // Hiệu ứng nền mờ
+            padding: "2rem",
+            maxWidth: "400px", // Tăng nhẹ độ rộng cho form đăng ký thoáng hơn
+            borderRadius: "15px", // Bo tròn nhiều hơn chút cho mềm mại
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Thêm đổ bóng nhẹ
+            backdropFilter: "blur(5px)", // Kích hoạt hiệu ứng kính (nếu trình duyệt hỗ trợ)
+          }}
+          onSubmit={handleSubmit}
+        >
+          <h1
+            style={{
+              textTransform: "uppercase",
+              fontWeight: "bold",
+              color: "#1C59A1", // ĐÃ SỬA: textColor -> color và thêm dấu #
+            }}
+            className="d-flex justify-content-center h3 mb-4 fw-normal"
+          >
+            Đăng ký
+          </h1>
 
+          {/* 1. Tên đăng nhập */}
+          <div className="form-floating mb-2">
+            <input
+              type="text"
+              className="form-control"
+              id="regUsername"
+              name="username"
+              placeholder="Tên đăng nhập"
+              value={form.username}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="regUsername">Tên đăng nhập</label>
+          </div>
+
+          {/* 2. Email (Mới thêm) */}
+          <div className="form-floating mb-2">
+            <input
+              type="email"
+              className="form-control"
+              id="regEmail"
+              name="email"
+              placeholder="name@example.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="regEmail">Địa chỉ Email</label>
+          </div>
+
+          {/* 3. Mật khẩu */}
+          <div className="form-floating mb-2">
+            <input
+              type="password"
+              className="form-control"
+              id="regPassword"
+              name="password"
+              placeholder="Mật khẩu"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="regPassword">Mật khẩu</label>
+          </div>
+
+          {/* 4. Nhập lại mật khẩu (Mới thêm) */}
+          <div className="form-floating mb-3">
+            <input
+              type="password"
+              className="form-control"
+              id="regConfirmPassword"
+              name="confirmPassword"
+              placeholder="Nhập lại mật khẩu"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="regConfirmPassword">Nhập lại mật khẩu</label>
+          </div>
+          {/* <br /> */}
+
+          {/* Hiển thị lỗi nếu có */}
+          {error && (
+            <div className="alert alert-danger py-2 small" role="alert">
+              {error}
+            </div>
+          )}
+
+          {/* Nút Submit */}
+          <button
+            className="btn btn-primary w-100 py-2 fw-bold"
+            type="submit"
+            disabled={isSubmitting}
+            style={{ backgroundColor: "#1C59A1", borderColor: "#1C59A1" }}
+          >
+            {isSubmitting ? "Đang xử lý..." : "Đăng ký ngay"}
+          </button>
+
+          <hr />
+          <div className="text-center mt-3">
+            <span className="text-muted small">Bạn đã có tài khoản? </span>
+            <Button
+              type="button"
+              className="btn btn-link p-0 text-decoration-none"
+              style={{ fontWeight: "600", color: "#1C59A1" }}
+              onClick={() => {
+                setRegistered(false);
+              }}
+            >
+              Đăng nhập
+            </Button>
+          </div>
+        </form>
+      )}
       {showResetForm && (
-        <div className="mt-4 border rounded p-3 bg-light">
+        <div
+          className="mt-4 border rounded p-3 bg-light"
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.8)" }}
+        >
           <h5 className="mb-3 text-center">Đặt lại mật khẩu</h5>
           <Form.Group className="mb-3">
             <Form.Label>Email đã đăng ký</Form.Label>

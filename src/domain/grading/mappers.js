@@ -1,6 +1,6 @@
 import { createGradingRecord, createProcessedResult } from "./models";
 
-const ANSWER_OPTIONS = ["A", "B", "C", "D"];
+const ANSWER_OPTIONS = ["A", "B", "C", "D", "?"];
 
 const toAnswerLetter = (value) => {
   const index = Number(value);
@@ -11,7 +11,7 @@ const toAnswerLetter = (value) => {
   if (ANSWER_OPTIONS.includes(upper)) {
     return upper;
   }
-  return ANSWER_OPTIONS[0];
+  return ANSWER_OPTIONS[4];
 };
 
 const mapDetailEntries = (entries = []) =>
@@ -30,39 +30,42 @@ const mapDetailEntries = (entries = []) =>
 
 export const mapRecordResponse = (record = {}, fallbackIndex = 0) => {
   const examinee = record.examinee || record.student || {};
+  
+  const examineeId = typeof record.examinee === 'object' ? record.examinee?.id : record.examinee;
+
   return createGradingRecord({
     recordId: record.id ?? record.recordId ?? null,
-    examineeId:
-      examinee.id ??
-      record.examinee ??
-      record.examinee_id ??
-      record.student_id ??
-      null,
-    studentCode:
-      examinee.student_ID ??
-      record.student_ID ??
-      record.examinee_code ??
-      examinee.code ??
-      `SV-${fallbackIndex + 1}`,
+    examineeId: examineeId ?? record.examinee_id ?? null,
+    studentCode: examinee.student_ID ?? record.student_ID ,
     fullName: examinee.name ?? record.name ?? `Thí sinh ${fallbackIndex + 1}`,
-    className: examinee.className ?? record.className ?? "—",
-    correctCount:
-      record.correct_count ?? record.correctCount ?? record.correct ?? 0,
-    score: record.score ?? record.total_score ?? record.mark ?? 0,
+    score: record.score ?? 0,
+    originalImage: 
+      record.original_image ||   
+      null,
+
+    processedImage: 
+      record.processed_image ||  
+      record.processedImage ||   
+      null,
   });
 };
 
 export const enrichRecordsWithDetails = (records, detailMap) =>
   records.map((record) => {
-    if (!record.examineeId || !detailMap.has(record.examineeId)) {
+    const key = String(record.examineeId);
+    if (!record.examineeId || !detailMap.has(key)) {
       return record;
     }
-    const detail = detailMap.get(record.examineeId);
+    
+    const detail = detailMap.get(key);
+    
     return createGradingRecord({
       ...record,
-      studentCode: detail.student_ID || record.studentCode,
-      fullName: detail.name || record.fullName,
+      studentCode: detail.student_ID || detail.code || record.studentCode,
+      fullName: detail.name || detail.fullName || record.fullName,
       className: detail.class_name || record.className,
+      originalImage: detail.original_image || record.originalImage,
+      processedImage: detail.processed_image || record.processedImage
     });
   });
 
@@ -90,10 +93,8 @@ export const mapProcessingResponse = (payload = {}) =>
         payload.answer_details ??
         []
     ),
-    originalImage: payload.original_image ?? null, // Map original image
-    originalImageName: payload.original_image_name ?? null, // Map original image name
-    processedImage: payload.processed_image ?? null, // Map processed image
-    processedImageName: payload.processed_image_name ?? null, // Map processed image name
+    originalImage: payload.original_image ?? null, 
+    processedImage: payload.processed_image ?? null, 
   });
 
 export const mapRecordResultResponse = (payload = {}) =>

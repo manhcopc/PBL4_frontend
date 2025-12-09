@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button, Row, Col, Card, Form, Table, Spinner, Alert } from "react-bootstrap";
 import gradingService from "../service/grading";
+import Portal from "../components/shared/item/Portal";
 
-const ANSWER_OPTIONS = ["A", "B", "C", "D"];
+const ANSWER_OPTIONS = ["A", "B", "C", "D", "?"];
 const getAnswerLetter = (value) => {
   const numeric = Number(value);
   if (
@@ -28,8 +29,24 @@ const Grading = () => {
   const [records, setRecords] = useState([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [recordsError, setRecordsError] = useState("");
-  const [detectFrame, setDetectFrame] = useState(true);
   const cameraImgRef = useRef(null);
+  const [zoomImage, setZoomImage] = useState(null);
+
+  const openZoom = (src) => setZoomImage(src);
+  const closeZoom = () => setZoomImage(null);
+  
+  const handleImageClick = (src) => {
+    openZoom(src);
+  };
+
+  const toggleImageDetails = (imageId) => {
+    setCapturedImages((prev) =>
+      prev.map((img) =>
+        img.id === imageId ? { ...img, isShowDetails: !img.isShowDetails } : img
+      )
+    );
+  };
+
 
   const applyResultDetailsToImage = (imageId, resultDetail) => {
     if (!resultDetail) return;
@@ -40,9 +57,15 @@ const Grading = () => {
               ...img,
               result: {
                 ...img.result,
-                made: resultDetail.examPaperCode || img.result?.made || "",
+                made:
+                  resultDetail.examPaperCode ||
+                  img.result?.made ||
+                  img.result?.exam_paper_code ||
+                  resultDetail.exam_paper_code,
                 examPaperCode:
-                  resultDetail.examPaperCode || img.result?.examPaperCode,
+                  resultDetail.exam_paper_code ||
+                  resultDetail.examPaperCode ||
+                  img.result?.examPaperCode,
                 totalQuestions:
                   resultDetail.totalQuestions ??
                   img.result?.totalQuestions ??
@@ -68,29 +91,23 @@ const Grading = () => {
     const url = gradingService.fetchCameraStreamUrl();
     setCameraStreamUrl(url);
   }, []);
-
   const handleUploadFromDevice = (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     const imageUrl = URL.createObjectURL(file);
-    const newImage = { id: Date.now(), src: imageUrl, file, status: 'idle', result: null, error: null, examineeId: '' };
+    const newImage = { id: Date.now(), src: imageUrl, file, status: 'idle', result: null, error: null, examineeId: '', isShowDetails: true, };
     setCapturedImages(prev => [newImage, ...prev]);
   };
 
   const captureImage = async () => {
     setIsCapturing(true);
     try {
-      // Gọi API để lấy ảnh snapshot dưới dạng blob
       const blob = await gradingService.fetchCameraSnapshot();
-
-      // Tạo file và URL từ blob
       const file = new File([blob], `camera-${Date.now()}.jpg`, {
         type: blob.type || "image/jpeg",
       });
       const imageUrl = URL.createObjectURL(blob);
-
-      // Thêm ảnh mới vào danh sách chờ chấm
       const newImage = {
         id: Date.now(),
         src: imageUrl,
@@ -99,6 +116,7 @@ const Grading = () => {
         result: null,
         error: null,
         examineeId: "",
+        isShowDetails: true,
       };
       setCapturedImages((prev) => [newImage, ...prev]);
     } catch (error) {
@@ -141,17 +159,6 @@ const Grading = () => {
     });
   };
 
-  //   setCapturedImages((prev) =>
-  //     prev.map((img) =>
-  //       img.id === imageId
-  //         ? {
-  //             ...img,
-  //             examineeId: value,
-  //           }
-  //         : img
-  //     )
-  //   );
-  // };
   const handleResultFieldChange = (imageId, field, value) => {
     setCapturedImages((prev) =>
       prev.map((img) =>
@@ -191,16 +198,16 @@ const Grading = () => {
     const targetImage = capturedImages.find((img) => img.id === imageId);
     if (!targetImage?.result) {
       console.error("Dữ liệu result không tồn tại:", targetImage);
-
       return;
     }
-    console.log("Dữ liệu result gửi đi:", targetImage.result, "với examId:", gradingExamId);
+    // console.log("Dữ liệu result gửi đi:", targetImage.result, "với examId:", gradingExamId);
 
     try {
       await gradingService.saveResult({
         exam: gradingExamId,
         result: targetImage.result,
       });
+      
       if (targetImage.result.recordId) {
         try {
           const recordInfo = await gradingService.fetchRecordResult(
@@ -308,9 +315,102 @@ const Grading = () => {
       );
     }
   };
+//   const handleSelectRecord = async (record) => {
+//     console.log("Dữ liệu record được chọn:", record);
+//     console.log("Link ảnh processed:", record.processedImage);
+//     console.log("Link ảnh original:", record.originalImage);
+//     if (!record.recordId) return;
+//     const displayImage = record.processedImage || record.originalImage;
+
+//     if (!displayImage) {
+//       alert("Bài thi này không có dữ liệu ảnh.");
+//       return;
+//     }
+
+//     const tempId = record.recordId;
+//     const existingImg = capturedImages.find((img) => img.id === tempId);
+//     if (existingImg) {
+// //
+//     } else {
+//       const newImage = {
+//         id: tempId,
+//         src: displayImage, 
+//         file: null, 
+//         status: "loading",
+//         result: null,
+//         error: null,
+//       };
+//       setCapturedImages((prev) => [newImage, ...prev]);
+//     }
+
+//     try {
+//       const recordInfo = await gradingService.fetchRecordResult(record.recordId);
+
+//       if (recordInfo?.result) {
+//         setCapturedImages((prev) =>
+//           prev.map((img) =>
+//             img.id === tempId
+//               ? {
+//                   ...img,
+//                   status: "graded",
+//                   result: {
+//                     ...recordInfo.result, 
+//                     score: record.score,
+//                   },
+//                 }
+//               : img
+//           )
+//         );
+//       } else {
+//         setCapturedImages((prev) =>
+//           prev.map((img) =>
+//             img.id === tempId
+//               ? {
+//                   ...img,
+//                   status: "error",
+//                   error: "Không tải được chi tiết chấm.",
+//                 }
+//               : img
+//           )
+//         );
+//       }
+//     } catch (error) {
+//       console.error("Lỗi tải chi tiết:", error);
+//       setCapturedImages((prev) =>
+//         prev.map((img) =>
+//           img.id === tempId
+//             ? { ...img, status: "error", error: "Lỗi kết nối server." }
+//             : img
+//         )
+//       );
+//     }
+  //   };
 
   return (
     <>
+      {zoomImage && (
+        <Portal>
+          <div
+            // className="fixed inset-0 bg-black/70 flex items-center justify-center z-[99999999]"
+            className="lightbox-overlay"
+            onClick={closeZoom}
+          >
+            <img
+              src={zoomImage}
+              className="rounded shadow-lg"
+              style={{ maxHeight: "90%", maxWidth: "90%" }}
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            <button
+              onClick={closeZoom}
+              className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-full shadow-lg"
+            >
+              ✕
+            </button>
+          </div>
+        </Portal>
+      )}
       <h1 style={{ color: "#1C59A1" }}>Trực tiếp</h1>
       <Row>
         <Col md={7}>
@@ -418,13 +518,16 @@ const Grading = () => {
                             )}
                             {image.result && (
                               <Button
-                                onClick={() => setDetectFrame(!detectFrame)}
-
-                                style={{ backgroundColor: "transparent", border: "1px solid #FFFFFF", color: "#1C59A1" }}
+                                onClick={() => toggleImageDetails(image.id)}
+                                style={{
+                                  backgroundColor: "transparent",
+                                  border: "1px solid #FFFFFF",
+                                  color: "#1C59A1",
+                                }}
                                 size="lg"
                                 className=" mb-3"
                               >
-                                {detectFrame ? "Hiện" : "Ẩn"}
+                                {image.isShowDetails ? "Hiện" : "Ẩn"}
                               </Button>
                             )}
                           </div>
@@ -445,124 +548,173 @@ const Grading = () => {
                                 : "Nhận diện & Chấm điểm"}
                             </Button>
 
-                            {detectFrame && (
-                              <div>
-                                {image.result && (
-                                  <div className="mt-3 w-100">
-                                    <Row className="g-2">
-                                      <Col md={6}>
-                                        <Form.Group>
-                                          <Form.Label>
-                                            Mã thí sinh (SBD)
-                                          </Form.Label>
-                                          <Form.Control
-                                            value={image.result.sbd || ""}
-                                            onChange={(e) =>
-                                              handleResultFieldChange(
-                                                image.id,
-                                                "sbd",
-                                                e.target.value
-                                              )
-                                            }
-                                          />
-                                        </Form.Group>
-                                      </Col>
-                                      <Col md={6}>
-                                        <Form.Group>
-                                          <Form.Label>Mã đề</Form.Label>
-                                          <Form.Control
-                                            value={image.result.made || ""}
-                                            onChange={(e) =>
-                                              handleResultFieldChange(
-                                                image.id,
-                                                "made",
-                                                e.target.value
-                                              )
-                                            }
-                                          />
-                                        </Form.Group>
-                                      </Col>
-                                    </Row>
-                                    {image.result.details?.length ? (
-                                      <div className="mt-3">
-                                        <p className="fw-semibold mb-1">
-                                          Kết quả chấm:
-                                        </p>
-                                        <div className="d-flex flex-wrap gap-2">
+                            {image.isShowDetails && image.result && (
+                              <div className="card mt-3 border-0 bg-light">
+                                <div className="card-body p-2">
+                                  <div className="row g-2 mb-3">
+                                    <div className="col-6">
+                                      <label className="form-label small fw-bold text-muted">
+                                        SBD
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="form-control form-control-sm fw-bold text-primary"
+                                        value={image.result.sbd || ""}
+                                        onChange={(e) =>
+                                          handleResultFieldChange(
+                                            image.id,
+                                            "sbd",
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder="Nhập SBD..."
+                                      />
+                                    </div>
+                                    <div className="col-6">
+                                      <label className="form-label small fw-bold text-muted">
+                                        Mã đề
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="form-control form-control-sm fw-bold text-primary"
+                                        value={image.result.made || ""}
+                                        onChange={(e) =>
+                                          handleResultFieldChange(
+                                            image.id,
+                                            "made",
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder="Mã đề..."
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <hr className="my-2" />
+                                  <div className="mb-3">
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                      <span className="fw-bold small">
+                                        Chi tiết bài làm:
+                                      </span>
+                                      <span className="badge bg-secondary">
+                                        {image.result.details?.length || 0} câu
+                                      </span>
+                                    </div>
+                                    <div
+                                      className="border rounded bg-white p-2"
+                                      style={{
+                                        maxHeight: "250px",
+                                        overflowY: "auto",
+                                      }}
+                                    >
+                                      {image.result.details?.length > 0 ? (
+                                        <div className="d-flex flex-wrap gap-2 justify-content-center">
                                           {image.result.details.map(
                                             (detail) => (
-                                              <span
+                                              <div
                                                 key={`${image.id}-${detail.questionNumber}`}
-                                                className={`px-3 py-2 rounded-pill fw-semibold ${
+                                                className={`border rounded px-2 py-1 text-center
+                                                ${
                                                   detail.markResult
-                                                    ? "bg-success text-white"
-                                                    : "bg-danger text-white"
+                                                    ? "border-success bg-success bg-opacity-10"
+                                                    : "border-danger bg-danger bg-opacity-10"
                                                 }`}
+                                                style={{ minWidth: "60px" }}
                                               >
-                                                Câu {detail.questionNumber}:{" "}
-                                                {detail.answerLetter ||
-                                                  getAnswerLetter(
-                                                    detail.answerNumber
-                                                  )}
-                                              </span>
+                                                <div
+                                                  className="small text-muted"
+                                                  style={{ fontSize: "0.7rem" }}
+                                                >
+                                                  Câu {detail.questionNumber}
+                                                </div>
+                                                <div
+                                                  className={`fw-bold ${
+                                                    detail.markResult
+                                                      ? "text-success"
+                                                      : "text-danger"
+                                                  }`}
+                                                >
+                                                  {detail.answerLetter ||
+                                                    getAnswerLetter(
+                                                      detail.answerNumber
+                                                    )}
+                                                </div>
+                                              </div>
                                             )
                                           )}
                                         </div>
-                                      </div>
-                                    ) : (
-                                      <div className="mt-3">
-                                        <p className="fw-semibold mb-1">
-                                          Đáp án:
-                                        </p>
-                                        <div className="d-flex flex-wrap gap-3 justify-content-between">
+                                      ) : (
+                                        <div className="row g-2">
                                           {Object.entries(
                                             image.result.answers || {}
                                           ).map(([question, answer]) => (
-                                            <Form.Group
+                                            <div
                                               key={`${image.id}-${question}`}
-                                              className="d-flex align-items-center"
+                                              className="col-4 col-sm-3"
                                             >
-                                              <Form.Label className="me-2 mb-0">
-                                                {question}
-                                              </Form.Label>
-                                              <Form.Select
-                                                size="sm"
-                                                value={answer || "A"}
-                                                onChange={(e) =>
-                                                  handleAnswerChange(
-                                                    image.id,
-                                                    question,
-                                                    e.target.value
-                                                  )
-                                                }
-                                              >
-                                                {ANSWER_OPTIONS.map((opt) => (
-                                                  <option key={opt} value={opt}>
-                                                    {opt}
-                                                  </option>
-                                                ))}
-                                              </Form.Select>
-                                            </Form.Group>
+                                              <div className="input-group input-group-sm">
+                                                <span
+                                                  className="input-group-text px-1 text-muted"
+                                                  style={{
+                                                    minWidth: "35px",
+                                                    justifyContent: "center",
+                                                  }}
+                                                >
+                                                  {question}
+                                                </span>
+                                                <select
+                                                  className="form-select px-1 fw-bold text-center"
+                                                  value={answer || "?"}
+                                                  style={{
+                                                    appearance: "none",
+                                                    WebkitAppearance: "none",
+                                                    MozAppearance: "none",
+                                                    backgroundImage: "none",
+                                                    cursor: "pointer",
+                                                    paddingRight: 0,
+                                                    paddingLeft: 0,
+                                                    textAlign: "center",
+                                                    textAlignLast: "center",
+                                                  }}
+                                                  onChange={(e) =>
+                                                    handleAnswerChange(
+                                                      image.id,
+                                                      question,
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                >
+                                                  {ANSWER_OPTIONS.map((opt) => (
+                                                    <option
+                                                      key={opt}
+                                                      value={opt}
+                                                    >
+                                                      {opt}
+                                                    </option>
+                                                  ))}
+                                                </select>
+                                              </div>
+                                            </div>
                                           ))}
                                         </div>
-                                      </div>
-                                    )}
+                                      )}
+                                    </div>
                                   </div>
-                                )}
 
-                                {image.result && (
-                                  <Button
-                                    variant="primary"
-                                    size="lg"
-                                    style={{ background: "#1C59A1" }}
-                                    className="w-100"
+                                  <button
+                                    className="btn btn-primary w-100 py-2 fw-bold shadow-sm"
+                                    style={{
+                                      backgroundColor: "#1C59A1",
+                                      borderColor: "#1C59A1",
+                                    }}
                                     onClick={() =>
                                       handleSaveResult(image.id, gradingExamId)
                                     }
                                   >
-                                    Chấm bài thi
-                                  </Button>
-                                )}
+                                    <i className="bi bi-floppy2-fill me-2"></i>
+                                    Lưu kết quả
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -575,205 +727,6 @@ const Grading = () => {
             </div>
           )}
         </Col>
-        {/* <Col md={7}>
-          <img
-            src={
-              cameraFrame || "https://placehold.co/600x400?text=Camera+Preview"
-            }
-            alt="Camera Stream"
-            style={{
-              width: "100%",
-              border: "2px solid #1C59A1",
-              borderRadius: "10px",
-            }}
-          />
-
-          <Button
-            style={{
-              background: "#1C59A1",
-            }}
-            className="mt-3 me-2"
-            onClick={fetchCameraFrame}
-            disabled={isCameraLoading}
-          >
-            {isCameraLoading ? "Đang tải..." : "Làm mới camera"}
-          </Button>
-
-          <Button
-            style={{
-              background: "#1C59A1",
-            }}
-            className="mt-3 me-2"
-            onClick={captureImage}
-            disabled={isCapturing}
-          >
-            {isCapturing ? "Đang chụp..." : "Chụp ảnh"}
-          </Button>
-
-          <Form.Group className="mt-3">
-            <Form.Label className="fw-semibold">
-              Hoặc tải ảnh từ máy (để chấm điểm thủ công):
-            </Form.Label>
-            <Form.Control
-              type="file"
-              accept="image/*"
-              onChange={handleUploadFromDevice}
-            />
-          </Form.Group>
-          {capturedImages.length > 0 && (
-            <div className="mt-4">
-              <h5>Ảnh chờ chấm điểm</h5>
-              {capturedImages.map((image) => (
-                <Card className="mb-3" key={image.id}>
-                  <Card.Body>
-                    <Row className="align-items-center">
-                      <Col md={6}>
-                        <img
-                          src={image.src}
-                          alt="Bài thi"
-                          style={{
-                            width: "100%",
-                            borderRadius: "8px",
-                            border: "1px solid #ccc",
-                          }}
-                        />
-                      </Col>
-                      <Col md={6}>
-                        <p className="mb-1">
-                          Trạng thái:{" "}
-                          <strong>
-                            {image.status === "idle" && "Chưa chấm"}
-                            {image.status === "grading" && "Đang chấm..."}
-                            {image.status === "graded" && "Đã chấm"}
-                            {image.status === "error" && "Lỗi"}
-                          </strong>
-                        </p>
-                        {image.error && (
-                          <p className="text-danger small mb-2">
-                            {image.error}
-                          </p>
-                        )}
-
-                        <Button
-                          variant="success"
-                          disabled={image.status === "grading"}
-                          onClick={() => handleGradeImage(image.id)}
-                        >
-                          {image.status === "grading"
-                            ? "Đang nhận diện..."
-                            : "Nhận diện"}
-                        </Button>
-                        {image.result && (
-                          <div className="mt-3 w-100">
-                            <Row className="g-2">
-                              <Col md={6}>
-                                <Form.Group>
-                                  <Form.Label>Mã thí sinh (SBD)</Form.Label>
-                                  <Form.Control
-                                    value={image.result.sbd || ""}
-                                    onChange={(e) =>
-                                      handleResultFieldChange(
-                                        image.id,
-                                        "sbd",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </Form.Group>
-                              </Col>
-                              <Col md={6}>
-                                <Form.Group>
-                                  <Form.Label>Mã đề</Form.Label>
-                                  <Form.Control
-                                    value={image.result.made || ""}
-                                    onChange={(e) =>
-                                      handleResultFieldChange(
-                                        image.id,
-                                        "made",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </Form.Group>
-                              </Col>
-                            </Row>
-                            {image.result.details?.length ? (
-                              <div className="mt-3">
-                                <p className="fw-semibold mb-1">
-                                  Kết quả chấm:
-                                </p>
-                                <div className="d-flex flex-wrap gap-2">
-                                  {image.result.details.map((detail) => (
-                                    <span
-                                      key={`${image.id}-${detail.questionNumber}`}
-                                      className={`px-3 py-2 rounded-pill fw-semibold ${
-                                        detail.markResult
-                                          ? "bg-success text-white"
-                                          : "bg-danger text-white"
-                                      }`}
-                                    >
-                                      Câu {detail.questionNumber}:{" "}
-                                      {detail.answerLetter ||
-                                        getAnswerLetter(detail.answerNumber)}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="mt-3">
-                                <p className="fw-semibold mb-1">Đáp án:</p>
-                                <div className="d-flex flex-wrap gap-3">
-                                  {Object.entries(
-                                    image.result.answers || {}
-                                  ).map(([question, answer]) => (
-                                    <Form.Group
-                                      key={`${image.id}-${question}`}
-                                      className="d-flex align-items-center"
-                                    >
-                                      <Form.Label className="me-2 mb-0">
-                                        {question}
-                                      </Form.Label>
-                                      <Form.Select
-                                        size="sm"
-                                        value={answer || "A"}
-                                        onChange={(e) =>
-                                          handleAnswerChange(
-                                            image.id,
-                                            question,
-                                            e.target.value
-                                          )
-                                        }
-                                      >
-                                        {ANSWER_OPTIONS.map((opt) => (
-                                          <option key={opt} value={opt}>
-                                            {opt}
-                                          </option>
-                                        ))}
-                                      </Form.Select>
-                                    </Form.Group>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {image.result && (
-                          <Button
-                            variant="primary"
-                            className="mt-2"
-                            onClick={() => handleSaveResult(image.id)}
-                          >
-                            Chấm bài thi
-                          </Button>
-                        )}
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              ))}
-            </div>
-          )}
-        </Col> */}
 
         <Col md={5}>
           <Card className="p-3" style={{ border: "1px solid #E3F2FD" }}>
@@ -813,30 +766,52 @@ const Grading = () => {
             ) : records.length === 0 ? (
               <div className="text-center text-muted">Chưa có dữ liệu.</div>
             ) : (
-              <Table striped bordered hover responsive size="sm">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Mã SV</th>
-                    <th>Họ tên</th>
-                    <th>Mã đề</th>
-                    <th>Số câu đúng</th>
-                    <th>Điểm</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {records.map((record, index) => (
-                    <tr key={record.recordId}>
-                      <td>{index + 1}</td>
-                      <td>{record.studentCode}</td>
-                      <td>{record.fullName}</td>
-                      <td>{record.made}</td>
-                      <td>{record.correctCount}</td>
-                      <td>{record.score}</td>
+              <div
+                className="table-responsive"
+                style={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
+              >
+                <Table striped bordered hover responsive size="sm">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Mã SV</th>
+                      <th>Họ tên</th>
+                      {/* <th>Mã đề</th> */}
+                      {/* <th>Số câu đúng</th> */}
+                      <th className="text-end">Điểm</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {/* {records.map((record, index) => (
+                      <tr key={record.recordId}>
+                        <td>{index + 1}</td>
+                        <td>{record.studentCode}</td>
+                        <td>{record.fullName}</td>
+                        <td>{record.made}</td>
+                        <td>{record.correctCount}</td>
+                        <td>{record.score}</td>
+                      </tr>
+                    ))} */}
+                    {records.map((record, index) => (
+                      <tr
+                        key={record.recordId}
+                        // onClick={() => handleSelectRecord(record)}
+                        style={{ cursor: "pointer" }}
+                        title="Bấm để xem lại bài thi"
+                        onClick={() => openZoom(record.processedImage)}
+                      >
+                        <td>{index + 1}</td>
+                        <td className="fw-bold">{record.studentCode}</td>
+                        <td>{record.fullName}</td>
+                        {/* <td>{record.made}</td> */}
+                        <td className="text-end fw-bold text-primary">
+                          {record.score}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
             )}
           </Card>
         </Col>
