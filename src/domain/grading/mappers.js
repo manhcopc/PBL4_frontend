@@ -79,8 +79,8 @@ export const mapProcessingResponse = (payload = {}) =>
       payload.made ?? payload.exam_code ?? "",
     answers:
       payload.answers ?? {},
-    examPaperCode:
-      payload.exam_paper_code ?? payload.made ?? "",
+    // examPaperCode:
+    //   payload.exam_paper_code ?? payload.made ?? "",
     totalQuestions:
       payload.total_questions ?? payload.totalQuestions ?? payload.question_count ?? 0,
     correctAnswers:
@@ -107,11 +107,11 @@ export const mapRecordResultResponse = (payload = {}) =>
       payload.exam_paper_code ??
       "",
     answers: {},
-    examPaperCode:
-      payload.result?.exam_paper_code ??
-      payload.exam_paper_code ??
-      payload.result?.made ??
-      "",
+    // examPaperCode:
+    //   payload.result?.exam_paper_code ??
+    //   payload.exam_paper_code ??
+    //   payload.result?.made ??
+    //   "",
     totalQuestions: payload.result?.total_questions ?? 0,
     correctAnswers: payload.result?.correct_answers ?? 0,
     score: payload.result?.score ?? 0,

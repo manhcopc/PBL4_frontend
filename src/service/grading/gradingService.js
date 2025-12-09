@@ -45,15 +45,15 @@ export default function createGradingService() {
             sbd: result.sbd || "",
             made: result.made || "",
             answers: result.answers || {}, 
-            
-            original_image: result.originalImage || null,
-            original_image_name: result.originalImageName || null,
-            processed_image: result.processedImage || null,
-            processed_image_name: result.processedImageName || null,
+            original_image: result.originalImage || result.original_image || null,
+            original_image_name: result.originalImageName || result.original_image_name || null,
+            processed_image: result.processedImage || result.processed_image || null,
+            processed_image_name: result.processedImageName || result.processed_image_name || null,
           },
         };
 
         const response = await gradingRepository.saveResult(payload);
+        console.log("saveResult Service:", response);
         return response;
       } catch (error) {
         console.error("Lỗi saveResult Service:", error);

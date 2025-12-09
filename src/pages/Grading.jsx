@@ -200,7 +200,7 @@ const Grading = () => {
       console.error("Dữ liệu result không tồn tại:", targetImage);
       return;
     }
-    // console.log("Dữ liệu result gửi đi:", targetImage.result, "với examId:", gradingExamId);
+    console.log("Dữ liệu result gửi đi:", targetImage.result, "với examId:", gradingExamId);
 
     try {
       await gradingService.saveResult({

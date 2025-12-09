@@ -79,22 +79,22 @@ export default function createGradingRepository() {
       return res.data;
     },
 
-async listRecords(examId) {
-  const res = await examineeRecordApi.getAllRecord(examId);
-  const raw = Array.isArray(res.data) ? res.data : [];
-  console.log("1. API Raw Data (Item đầu tiên):", raw[0]);
-  let records = raw.map((record, index) =>
-    mapRecordResponse(record, index)
-  );
-  console.log("2. Sau Mapper lần 1 (Item đầu tiên):", records[0]);
-  const detailMap = await fetchMissingDetails(records);
-  
-  if (detailMap.size) {
-    records = enrichRecordsWithDetails(records, detailMap);
-  }
-  console.log("3. Dữ liệu cuối cùng (Enriched):", records[0]);
-  return records;
-},
+    async listRecords(examId) {
+      const res = await examineeRecordApi.getAllRecord(examId);
+      const raw = Array.isArray(res.data) ? res.data : [];
+      console.log("1. API Raw Data (Item đầu tiên):", raw[0]);
+      let records = raw.map((record, index) =>
+        mapRecordResponse(record, index)
+      );
+      console.log("2. Sau Mapper lần 1 (Item đầu tiên):", records[0]);
+      const detailMap = await fetchMissingDetails(records);
+      
+      if (detailMap.size) {
+        records = enrichRecordsWithDetails(records, detailMap);
+      }
+      console.log("3. Dữ liệu cuối cùng (Enriched):", records[0]);
+      return records;
+    },
     async processImage(file) {
       const formData = new FormData();
       if (file) {

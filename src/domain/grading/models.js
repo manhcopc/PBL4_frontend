@@ -3,7 +3,6 @@ export const createGradingRecord = (props = {}) => ({
   examineeId: props.examineeId ?? null,
   studentCode: props.studentCode ?? "",
   fullName: props.fullName ?? "",
-  className: props.className ?? "",
   correctCount: props.correctCount ?? 0,
   score: props.score ?? 0,
 
@@ -16,7 +15,7 @@ export const createProcessedResult = (props = {}) => ({
   sbd: props.sbd ?? "",
   made: props.made ?? "",
   answers: props.answers ?? {},
-  examPaperCode: props.examPaperCode ?? props.made ?? "",
+  // examPaperCode: props.examPaperCode ?? props.made ?? "",
   totalQuestions: props.totalQuestions ?? 0,
   correctAnswers: props.correctAnswers ?? 0,
   score: props.score ?? 0,
