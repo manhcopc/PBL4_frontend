@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/server/:match*",
-      "destination": "https://testmarkdb.azurewebsites.net/api/:match*"
+      "source": "/server/:path*",
+      "destination": "https://testmarkdb.azurewebsites.net/api/:path*"
+    },
+    {
+      "source": "/server/(.*)",
+      "destination": "https://testmarkdb.azurewebsites.net/api/$1"
     },
     {
       "source": "/(.*)",
