@@ -10,17 +10,6 @@ import {
 } from "../../domain/grading/mappers";
 
 
-// const collectMissingDetailIds = (records) => {
-//   const ids = new Set();
-//   records.forEach((record) => {
-//     // Ép kiểu String để đảm bảo tính nhất quán (tránh lỗi 10 vs "10")
-//     if (record.examineeId) {
-//       ids.add(String(record.examineeId));
-//     }
-//   });
-//   return Array.from(ids);
-// };
-
 const collectAllExamineeIds = (records) => {
   const ids = new Set();
   records.forEach((record) => {
@@ -79,22 +68,22 @@ export default function createGradingRepository() {
       return res.data;
     },
 
-async listRecords(examId) {
-  const res = await examineeRecordApi.getAllRecord(examId);
-  const raw = Array.isArray(res.data) ? res.data : [];
-  console.log("1. API Raw Data (Item đầu tiên):", raw[0]);
-  let records = raw.map((record, index) =>
-    mapRecordResponse(record, index)
-  );
-  console.log("2. Sau Mapper lần 1 (Item đầu tiên):", records[0]);
-  const detailMap = await fetchMissingDetails(records);
-  
-  if (detailMap.size) {
-    records = enrichRecordsWithDetails(records, detailMap);
-  }
-  console.log("3. Dữ liệu cuối cùng (Enriched):", records[0]);
-  return records;
-},
+    async listRecords(examId) {
+      const res = await examineeRecordApi.getAllRecord(examId);
+      const raw = Array.isArray(res.data) ? res.data : [];
+      // console.log("1. API Raw Data (Item đầu tiên):", raw[0]);
+      let records = raw.map((record, index) =>
+        mapRecordResponse(record, index)
+      );
+      // console.log("2. Sau Mapper lần 1 (Item đầu tiên):", records[0]);
+      const detailMap = await fetchMissingDetails(records);
+      
+      if (detailMap.size) {
+        records = enrichRecordsWithDetails(records, detailMap);
+      }
+      // console.log("3. Dữ liệu cuối cùng (Enriched):", records[0]);
+      return records;
+    },
     async processImage(file) {
       const formData = new FormData();
       if (file) {
@@ -109,15 +98,22 @@ async listRecords(examId) {
     },
 
     async fetchRecordResult(recordId) {
+      // 1. Gọi API
       const res = await examineeRecordApi.getResult(recordId);
-    
-      const rawData = res.data;
+      
+      const rawData = Array.isArray(res.data) ? res.data[0] : res.data;
 
-      const firstItem = Array.isArray(rawData) ? rawData[0] : rawData;
+      if (!rawData) return null;
+
+      console.log("Repo Raw Data:", rawData);
+      const record = mapRecordResponse(rawData);
+      const result = mapRecordResultResponse(rawData);
+
+      console.log("Repo Mapped Result:", result);
 
       return {
-        record: mapRecordResponse(firstItem || {}, 0),
-        result: mapRecordResultResponse(rawData),
+        record,
+        result
       };
     },
   };

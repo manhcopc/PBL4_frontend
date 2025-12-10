@@ -16,16 +16,19 @@ const toAnswerLetter = (value) => {
 
 const mapDetailEntries = (entries = []) =>
   Array.isArray(entries)
-    ? entries.map((entry, index) => ({
-        questionNumber:
-          entry.question_number ??
-          entry.questionNumber ??
-          entry.order ??
-          index + 1,
-        answerNumber: entry.answer_number ?? entry.answerNumber ?? 0,
-        answerLetter: toAnswerLetter(entry.answer_number ?? entry.answerLetter),
-        markResult: Boolean(entry.mark_result ?? entry.markResult ?? false),
-      }))
+    ? entries.map((entry, index) => {
+      console.log(`Mapping detail ${index}:`, entry);
+        return {
+          questionNumber:
+            entry.question_number ??
+            entry.questionNumber ??
+            entry.order ??
+            index + 1,
+          answerNumber: entry.answer_number ?? entry.answerNumber ?? 0,
+          answerLetter: toAnswerLetter(entry.answer_number ?? entry.answerLetter),
+          markResult: Boolean(entry.mark_result ?? entry.markResult ?? false),
+        };
+      })
     : [];
 
 export const mapRecordResponse = (record = {}, fallbackIndex = 0) => {
@@ -97,23 +100,15 @@ export const mapProcessingResponse = (payload = {}) =>
     processedImage: payload.processed_image ?? null, 
   });
 
-export const mapRecordResultResponse = (payload = {}) =>
-  createProcessedResult({
-    recordId: payload.id ?? payload.recordId ?? null,
-    sbd: payload.result?.sbd ?? payload.examinee?.student_ID ?? "",
-    made:
-      payload.result?.exam_paper_code ??
-      payload.result?.made ??
-      payload.exam_paper_code ??
-      "",
-    answers: {},
-    examPaperCode:
-      payload.result?.exam_paper_code ??
-      payload.exam_paper_code ??
-      payload.result?.made ??
-      "",
-    totalQuestions: payload.result?.total_questions ?? 0,
-    correctAnswers: payload.result?.correct_answers ?? 0,
-    score: payload.result?.score ?? 0,
-    details: mapDetailEntries(payload.result?.details || []),
+export const mapRecordResultResponse = (payload = {}) => {
+  const resultData = payload.result || {}; 
+
+  return createProcessedResult({
+    recordId: payload.id || payload.recordId,
+    score: resultData.score ?? 0,
+    correctAnswers: resultData.correct_answers ?? resultData.correctAnswers ?? 0,
+    totalQuestions: resultData.total_questions ?? resultData.totalQuestions ?? 0,
+    examPaperCode: resultData.exam_paper_code ?? "",
+    details: mapDetailEntries(resultData.details || [])
   });
+};
