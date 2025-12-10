@@ -21,7 +21,12 @@ const getAnswerLetter = (value) => {
 };
 
 const Grading = () => {
-  const [cameraStreamUrl, setCameraStreamUrl] = useState("");
+  // const [cameraUrl, setCameraUrl] = useState(
+  //   `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
+  // );
+  const [cameraStreamUrl, setCameraStreamUrl] = useState(
+    `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
+  );
   // const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImages, setCapturedImages] = useState([]);
@@ -29,15 +34,14 @@ const Grading = () => {
   const [records, setRecords] = useState([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [recordsError, setRecordsError] = useState("");
-  const cameraImgRef = useRef(null);
   const [zoomImage, setZoomImage] = useState(null);
-
   const openZoom = (src) => setZoomImage(src);
   const closeZoom = () => setZoomImage(null);
-  
-  // const handleImageClick = (src) => {
-  //   openZoom(src);
-  // };
+  const cameraImgRef = useRef(null);
+
+  const handleRefreshCamera = () => {
+    setCameraStreamUrl(`/api/CameraStream/TMDB-00001/?t=${Date.now()}`);
+  };
 
   const toggleImageDetails = (imageId) => {
     setCapturedImages((prev) =>
@@ -87,9 +91,14 @@ const Grading = () => {
     );
   };
 
+  // useEffect(() => {
+  //   const url = gradingService.fetchCameraStreamUrl();
+  //   setCameraStreamUrl(url);
+  // }, []);
   useEffect(() => {
-    const url = gradingService.fetchCameraStreamUrl();
-    setCameraStreamUrl(url);
+    return () => {
+      capturedImages.forEach((img) => URL.revokeObjectURL(img.src));
+    };
   }, []);
   const handleUploadFromDevice = (event) => {
     const file = event.target.files[0];
@@ -118,7 +127,15 @@ const Grading = () => {
         examineeId: "",
         isShowDetails: true,
       };
-      setCapturedImages((prev) => [newImage, ...prev]);
+      // setCapturedImages((prev) => [newImage, ...prev]);
+      setCapturedImages((prev) => {
+        if (prev.length >= 10) {
+          const oldImage = prev[prev.length - 1];
+          URL.revokeObjectURL(oldImage.src);
+          return [newImage, ...prev.slice(0, 9)];
+        }
+        return [newImage, ...prev];
+      });
     } catch (error) {
       console.error("Lỗi khi chụp ảnh:", error);
       alert("Không thể chụp ảnh từ camera. Vui lòng thử lại.");
@@ -250,19 +267,19 @@ const Grading = () => {
   };
 
   const handleGradeImage = async (imageId) => {
-    if (!gradingExamId) {
-      setCapturedImages((prev) =>
-        prev.map((img) =>
-          img.id === imageId
-            ? {
-                ...img,
-                error: "Vui lòng nhập mã kỳ thi trước khi nhận diện.",
-              }
-            : img
-        )
-      );
-      return;
-    }
+    // if (!gradingExamId) {
+    //   setCapturedImages((prev) =>
+    //     prev.map((img) =>
+    //       img.id === imageId
+    //         ? {
+    //             ...img,
+    //             error: "Vui lòng nhập mã kỳ thi trước khi nhận diện.",
+    //           }
+    //         : img
+    //     )
+    //   );
+    //   return;
+    // }
 
     const targetImage = capturedImages.find((img) => img.id === imageId);
     if (!targetImage) return;
@@ -374,8 +391,9 @@ const Grading = () => {
           >
             <img
               ref={cameraImgRef}
-              src="/api/CameraStream/TMDB-00001/"
+              src={cameraStreamUrl} // <--- Dùng biến state ở đây
               alt="Camera Stream"
+              // src="/api/CameraStream/TMDB-00001/"
               crossOrigin="anonymous"
               className="w-full h-full object-cover"
               style={{
@@ -393,6 +411,14 @@ const Grading = () => {
               LIVE
             </div>
           </div>
+          <Button
+            style={{ background: "#1C59A1" }}
+            className="mt-3 me-2"
+            onClick={handleRefreshCamera}
+            // disabled={isCapturing}
+          >
+            Làm mới Camera
+          </Button>
           <Button
             style={{ background: "#1C59A1" }}
             className="mt-3 me-2"
