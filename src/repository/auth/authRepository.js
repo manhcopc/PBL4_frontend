@@ -1,7 +1,8 @@
 import axios from "axios";
 import api from "../../api/api";
 
-const API_URL = "/api";
+// const API_URL = "/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://testmarkdb.azurewebsites.net/api";
 const publicClient = axios.create({
   baseURL: API_URL,
 });
