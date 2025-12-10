@@ -1,0 +1,263 @@
+import { Modal, Table, Button, Row, Col, Form, Spinner } from "react-bootstrap";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import scoreManagementService from "../../service/scoreManagement";
+import Portal from "../../components/shared/item/Portal";
+import "../../assets/Share.css";
+export default function Detail({ show, onClose, exam }) {
+  const [records, setRecords] = useState([]);
+  const [originalRecords, setOriginalRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [zoomImage, setZoomImage] = useState(null);
+
+const openZoom = (src) => setZoomImage(src);
+const closeZoom = () => setZoomImage(null);
+
+const examId = exam?.id;
+
+  const fetchRecords = useCallback(async () => {
+    if (!examId) return;
+    setIsLoading(true);
+    try {
+      const list = await scoreManagementService.getExamRecords(examId);
+      const deepCopyForOriginal = JSON.parse(JSON.stringify(list));
+
+      setOriginalRecords(deepCopyForOriginal);
+      const uiData = list.map((r) => ({
+        ...r,
+        pendingImageUpload: null, 
+        gradedImageUpload: null, 
+      }));
+      setRecords(uiData);
+    } catch (error) {
+      console.error("Lỗi tải data:", error);
+      alert("Không thể tải danh sách bài làm.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [examId]);
+    const totalQuestions = exam?.questionCount || 0;
+
+  useEffect(() => {
+    if (show && examId) {
+      fetchRecords();
+    } else if (!show) {
+      setRecords([]);
+      setOriginalRecords([]);
+    }
+  }, [show, examId, fetchRecords]);
+  const handleChange = (recordId, field, value) => {
+    setRecords((prev) =>
+      prev.map((record) => {
+        if (record.recordId !== recordId) return record;
+        let parsedVal = 0;
+        if (field === "score") parsedVal = parseFloat(value) || 0;
+        else parsedVal = parseInt(value, 10) || 0;
+
+        return { ...record, [field]: parsedVal };
+      })
+    );
+  };
+    const averageScore = useMemo(() => {
+      if (!records.length) return 0;
+      const sum = records.reduce(
+        (acc, record) => acc + (Number(record.score) || 0),
+        0
+      );
+      return (sum / records.length).toFixed(2);
+    }, [records]);
+      const totalStudents = records.length;
+
+  const handleSave = async () => {
+    if (!examId || !records.length) {
+      onClose?.();
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await scoreManagementService.saveExamRecords({
+        examId,
+        updatedRecords: records,
+        originalRecords,
+      });
+      if (result.failed > 0) {
+        alert(
+          `Lưu hoàn tất nhưng có ${result.failed} bản ghi bị lỗi. Vui lòng kiểm tra lại.`
+        );
+        await fetchRecords();
+      } else if (result.success > 0) {
+        alert("Lưu thành công tất cả!");
+        onClose?.();
+      } else {
+        onClose?.();
+      }
+      } catch (error) {
+        console.error("Lỗi hệ thống:", error);
+        alert("Có lỗi xảy ra khi lưu.");
+      } finally {
+        setIsSaving(false);
+      }
+  };
+
+  if (!show) return null;
+
+
+
+
+  return (
+    <>
+      {zoomImage && (
+        <Portal>
+          <div
+            // className="fixed inset-0 bg-black/70 flex items-center justify-center z-[99999999]"
+            className="lightbox-overlay"
+            onClick={closeZoom}
+          >
+            <img
+              src={zoomImage}
+              className="rounded shadow-lg"
+              style={{ maxHeight: "90%", maxWidth: "90%" }}
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            <button
+              onClick={closeZoom}
+              className="absolute top-5 right-5 bg-white text-black px-4 py-2 rounded-full shadow-lg"
+            >
+              ✕
+            </button>
+          </div>
+        </Portal>
+      )}
+
+      <Modal
+        style={{ boxShadow: "0 4px 20px rgba(13, 110, 253, 0.3)" }}
+        className="shadow-lg"
+        show={show}
+        onHide={onClose}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Chi tiết kỳ thi</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {errorMessage && (
+            <div className="text-danger text-center mb-3">{errorMessage}</div>
+          )}
+          {isLoading ? (
+            <div className="text-center py-4">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : (
+            <>
+              <p>
+                <strong>Tổng số câu hỏi:</strong> {totalQuestions || "—"}
+              </p>
+              <p>
+                <strong>Tổng số sinh viên:</strong> {totalStudents}
+              </p>
+              <p>
+                <strong>Điểm trung bình: </strong>
+                {averageScore}
+              </p>
+
+              <hr />
+              <h6 className="fw-bold text-secondary mb-3">Danh sách kết quả</h6>
+              <div className="table-responsive">
+                <Table bordered hover className="mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Mã SV</th>
+                      <th>Họ tên</th>
+                      <th>Điểm</th>
+                      <th>Bài thi chưa chấm</th>
+                      <th>Bài thi đã chấm</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {records.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="text-center text-muted py-3">
+                          Chưa có dữ liệu bài thi.
+                        </td>
+                      </tr>
+                    ) : (
+                      records.map((record, index) => (
+                        <tr key={record.recordId}>
+                          <td>{index + 1}</td>
+                          <td>{record.studentCode}</td>
+                          <td>{record.fullName}</td>
+                          <td style={{ width: "150px" }}>
+                            <Form.Control
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max="10"
+                              value={record.score}
+                              onChange={(e) =>
+                                handleChange(
+                                  record.recordId,
+                                  "score",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <div className="d-flex flex-column gap-2">
+                              {record.pendingImage ? (
+                                <img
+                                  src={record.pendingImage}
+                                  onClick={() => openZoom(record.pendingImage)}
+                                  style={{ cursor: "zoom-in", maxWidth: 80 }}
+                                />
+                              ) : (
+                                <span className="text-muted small">—</span>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex flex-column gap-2">
+                              {record.gradedImage ? (
+                                <img
+                                  src={record.gradedImage}
+                                  onClick={() => openZoom(record.gradedImage)}
+                                  style={{ cursor: "zoom-in", maxWidth: 80 }}
+                                />
+                              ) : (
+                                <span className="text-muted small">—</span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onClose} disabled={isSaving}>
+            Đóng
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSave}
+            disabled={isSaving || isLoading || !records.length}
+          >
+            {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+}
