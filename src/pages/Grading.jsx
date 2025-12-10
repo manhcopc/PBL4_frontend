@@ -21,7 +21,12 @@ const getAnswerLetter = (value) => {
 };
 
 const Grading = () => {
-  const [cameraStreamUrl, setCameraStreamUrl] = useState("");
+  // const [cameraUrl, setCameraUrl] = useState(
+  //   `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
+  // );
+  const [cameraStreamUrl, setCameraStreamUrl] = useState(
+    `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
+  );
   // const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImages, setCapturedImages] = useState([]);
@@ -29,14 +34,13 @@ const Grading = () => {
   const [records, setRecords] = useState([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [recordsError, setRecordsError] = useState("");
-  const cameraImgRef = useRef(null);
   const [zoomImage, setZoomImage] = useState(null);
-
   const openZoom = (src) => setZoomImage(src);
   const closeZoom = () => setZoomImage(null);
-  
-  const handleImageClick = (src) => {
-    openZoom(src);
+  const cameraImgRef = useRef(null);
+
+  const handleRefreshCamera = () => {
+    setCameraStreamUrl(`/api/CameraStream/TMDB-00001/?t=${Date.now()}`);
   };
 
   const toggleImageDetails = (imageId) => {
@@ -87,9 +91,14 @@ const Grading = () => {
     );
   };
 
+  // useEffect(() => {
+  //   const url = gradingService.fetchCameraStreamUrl();
+  //   setCameraStreamUrl(url);
+  // }, []);
   useEffect(() => {
-    const url = gradingService.fetchCameraStreamUrl();
-    setCameraStreamUrl(url);
+    return () => {
+      capturedImages.forEach((img) => URL.revokeObjectURL(img.src));
+    };
   }, []);
   const handleUploadFromDevice = (event) => {
     const file = event.target.files[0];
@@ -118,7 +127,15 @@ const Grading = () => {
         examineeId: "",
         isShowDetails: true,
       };
-      setCapturedImages((prev) => [newImage, ...prev]);
+      // setCapturedImages((prev) => [newImage, ...prev]);
+      setCapturedImages((prev) => {
+        if (prev.length >= 10) {
+          const oldImage = prev[prev.length - 1];
+          URL.revokeObjectURL(oldImage.src);
+          return [newImage, ...prev.slice(0, 9)];
+        }
+        return [newImage, ...prev];
+      });
     } catch (error) {
       console.error("Lỗi khi chụp ảnh:", error);
       alert("Không thể chụp ảnh từ camera. Vui lòng thử lại.");
@@ -128,23 +145,23 @@ const Grading = () => {
   };
 
   const fetchRecords = async (targetExamId = gradingExamId) => {
-    if (!targetExamId) {
-      return;
-    }
+    if (!targetExamId) return [];
+
     setRecordsLoading(true);
     setRecordsError("");
     try {
       const list = await gradingService.listRecords(targetExamId);
       setRecords(list);
+      return list;
     } catch (error) {
-      console.error("Không thể tải danh sách thí sinh đã chấm", error);
-      setRecordsError("Không thể tải danh sách thí sinh đã chấm.");
+      console.error("Lỗi fetchRecords:", error);
+      setRecordsError("Không thể tải danh sách.");
       setRecords([]);
+      return []; 
     } finally {
       setRecordsLoading(false);
     }
   };
-
   const upsertRecord = (newRecord) => {
     setRecords((prev) => {
       const existingIndex = prev.findIndex(
@@ -194,56 +211,77 @@ const Grading = () => {
     );
   };
 
+  
   const handleSaveResult = async (imageId, gradingExamId) => {
     const targetImage = capturedImages.find((img) => img.id === imageId);
-    if (!targetImage?.result) {
-      console.error("Dữ liệu result không tồn tại:", targetImage);
-      return;
-    }
-    console.log("Dữ liệu result gửi đi:", targetImage.result, "với examId:", gradingExamId);
+
+    if (!targetImage?.result) return;
+    const currentSBD = targetImage.result.sbd;
+
 
     try {
       await gradingService.saveResult({
         exam: gradingExamId,
         result: targetImage.result,
       });
-      
-      if (targetImage.result.recordId) {
-        try {
-          const recordInfo = await gradingService.fetchRecordResult(
-            targetImage.result.recordId
+      console.log("Đang tải lại danh sách để tìm SBD:", currentSBD);
+      const latestRecords = await fetchRecords(gradingExamId);
+      const foundRecord = latestRecords.find(
+        (rec) => String(rec.studentCode) === String(currentSBD)
+      );
+
+      if (foundRecord) {
+        console.log("Tìm thấy record trong danh sách:", foundRecord);
+        console.log("Record ID cần lấy kết quả:", foundRecord.recordId);
+        const enrichedData = await gradingService.fetchRecordResult(
+          foundRecord.recordId
+        );
+
+        if (enrichedData?.result) {
+          console.log("Dữ liệu chi tiết từ API:", enrichedData.result);
+          setCapturedImages((prev) =>
+            prev.map((img) => {
+              if (img.id === imageId) {
+                return {
+                  ...img,
+                  status: "graded",
+                  isShowDetails: true,
+                  result: {
+                    ...img.result,
+                    score: enrichedData.result.score,
+                    details: enrichedData.result.details,
+                  },
+                };
+              }
+              return img;
+            })
           );
-          if (recordInfo?.record) {
-            upsertRecord(recordInfo.record);
-          }
-          if (recordInfo?.result) {
-            applyResultDetailsToImage(imageId, recordInfo.result);
-          }
-        } catch (detailError) {
-          console.error("Không thể tải chi tiết bài thi", detailError);
         }
+      } else {
+        console.warn(
+          "Lưu thành công nhưng không tìm thấy SBD trong danh sách mới tải."
+        );
       }
-      await fetchRecords(gradingExamId);
     } catch (error) {
-      console.error("Không thể lưu kết quả chấm", error);
-      alert("Không thể lưu kết quả chấm điểm. Vui lòng thử lại.");
+      console.error("Lỗi quy trình Lưu:", error);
+      alert("Lỗi khi lưu kết quả.");
     }
   };
 
   const handleGradeImage = async (imageId) => {
-    if (!gradingExamId) {
-      setCapturedImages((prev) =>
-        prev.map((img) =>
-          img.id === imageId
-            ? {
-                ...img,
-                error: "Vui lòng nhập mã kỳ thi trước khi nhận diện.",
-              }
-            : img
-        )
-      );
-      return;
-    }
+    // if (!gradingExamId) {
+    //   setCapturedImages((prev) =>
+    //     prev.map((img) =>
+    //       img.id === imageId
+    //         ? {
+    //             ...img,
+    //             error: "Vui lòng nhập mã kỳ thi trước khi nhận diện.",
+    //           }
+    //         : img
+    //     )
+    //   );
+    //   return;
+    // }
 
     const targetImage = capturedImages.find((img) => img.id === imageId);
     if (!targetImage) return;
@@ -315,76 +353,6 @@ const Grading = () => {
       );
     }
   };
-//   const handleSelectRecord = async (record) => {
-//     console.log("Dữ liệu record được chọn:", record);
-//     console.log("Link ảnh processed:", record.processedImage);
-//     console.log("Link ảnh original:", record.originalImage);
-//     if (!record.recordId) return;
-//     const displayImage = record.processedImage || record.originalImage;
-
-//     if (!displayImage) {
-//       alert("Bài thi này không có dữ liệu ảnh.");
-//       return;
-//     }
-
-//     const tempId = record.recordId;
-//     const existingImg = capturedImages.find((img) => img.id === tempId);
-//     if (existingImg) {
-// //
-//     } else {
-//       const newImage = {
-//         id: tempId,
-//         src: displayImage, 
-//         file: null, 
-//         status: "loading",
-//         result: null,
-//         error: null,
-//       };
-//       setCapturedImages((prev) => [newImage, ...prev]);
-//     }
-
-//     try {
-//       const recordInfo = await gradingService.fetchRecordResult(record.recordId);
-
-//       if (recordInfo?.result) {
-//         setCapturedImages((prev) =>
-//           prev.map((img) =>
-//             img.id === tempId
-//               ? {
-//                   ...img,
-//                   status: "graded",
-//                   result: {
-//                     ...recordInfo.result, 
-//                     score: record.score,
-//                   },
-//                 }
-//               : img
-//           )
-//         );
-//       } else {
-//         setCapturedImages((prev) =>
-//           prev.map((img) =>
-//             img.id === tempId
-//               ? {
-//                   ...img,
-//                   status: "error",
-//                   error: "Không tải được chi tiết chấm.",
-//                 }
-//               : img
-//           )
-//         );
-//       }
-//     } catch (error) {
-//       console.error("Lỗi tải chi tiết:", error);
-//       setCapturedImages((prev) =>
-//         prev.map((img) =>
-//           img.id === tempId
-//             ? { ...img, status: "error", error: "Lỗi kết nối server." }
-//             : img
-//         )
-//       );
-//     }
-  //   };
 
   return (
     <>
@@ -425,8 +393,9 @@ const Grading = () => {
           >
             <img
               ref={cameraImgRef}
-              src="/api/CameraStream/TMDB-00001/"
+              src={cameraStreamUrl} // <--- Dùng biến state ở đây
               alt="Camera Stream"
+              // src="/api/CameraStream/TMDB-00001/"
               crossOrigin="anonymous"
               className="w-full h-full object-cover"
               style={{
@@ -444,6 +413,14 @@ const Grading = () => {
               LIVE
             </div>
           </div>
+          <Button
+            style={{ background: "#1C59A1" }}
+            className="mt-3 me-2"
+            onClick={handleRefreshCamera}
+            // disabled={isCapturing}
+          >
+            Làm mới Camera
+          </Button>
           <Button
             style={{ background: "#1C59A1" }}
             className="mt-3 me-2"
@@ -607,40 +584,63 @@ const Grading = () => {
                                         overflowY: "auto",
                                       }}
                                     >
-                                      {image.result.details?.length > 0 ? (
-                                        <div className="d-flex flex-wrap gap-2 justify-content-center">
+                                      {/* {image.result.details?.length > 0 ? ( */}
+                                      {console.log(
+                                        `Ảnh ${image.id} - Details Length:`,
+                                        image.result.details?.length
+                                      ) || image.result.details?.length > 0 ? (
+                                        <div className="row g-2">
                                           {image.result.details.map(
-                                            (detail) => (
-                                              <div
-                                                key={`${image.id}-${detail.questionNumber}`}
-                                                className={`border rounded px-2 py-1 text-center
-                                                ${
-                                                  detail.markResult
-                                                    ? "border-success bg-success bg-opacity-10"
-                                                    : "border-danger bg-danger bg-opacity-10"
-                                                }`}
-                                                style={{ minWidth: "60px" }}
-                                              >
+                                            (detail) => {
+                                              const isCorrect =
+                                                detail.markResult === true;
+                                              const isIncorrect =
+                                                detail.markResult === false;
+                                              let colorClass = "";
+                                              if (isCorrect)
+                                                colorClass = "text-success";
+                                              if (isIncorrect)
+                                                colorClass = "text-danger";
+
+                                              return (
                                                 <div
-                                                  className="small text-muted"
-                                                  style={{ fontSize: "0.7rem" }}
+                                                  key={`${image.id}-${detail.questionNumber}`}
+                                                  className="col-4 col-sm-3"
                                                 >
-                                                  Câu {detail.questionNumber}
+                                                  <div
+                                                    className={`d-flex align-items-center p-1 rounded ${
+                                                      isCorrect
+                                                        ? "bg-success-soft"
+                                                        : ""
+                                                    } ${
+                                                      isIncorrect
+                                                        ? "bg-danger-soft"
+                                                        : ""
+                                                    }`}
+                                                  >
+                                                    <span
+                                                      className={`fw-bold me-2 px-2 py-1 rounded ${
+                                                        isCorrect
+                                                          ? "bg-success text-white"
+                                                          : isIncorrect
+                                                          ? "bg-danger text-white"
+                                                          : "bg-light"
+                                                      }`}
+                                                    >
+                                                      {detail.questionNumber}
+                                                    </span>
+                                                    <span
+                                                      className={`fw-bold fs-5 ${colorClass}`}
+                                                    >
+                                                      {detail.answerLetter ||
+                                                        getAnswerLetter(
+                                                          detail.answerNumber
+                                                        )}
+                                                    </span>
+                                                  </div>
                                                 </div>
-                                                <div
-                                                  className={`fw-bold ${
-                                                    detail.markResult
-                                                      ? "text-success"
-                                                      : "text-danger"
-                                                  }`}
-                                                >
-                                                  {detail.answerLetter ||
-                                                    getAnswerLetter(
-                                                      detail.answerNumber
-                                                    )}
-                                                </div>
-                                              </div>
-                                            )
+                                              );
+                                            }
                                           )}
                                         </div>
                                       ) : (
@@ -700,20 +700,24 @@ const Grading = () => {
                                       )}
                                     </div>
                                   </div>
-
-                                  <button
-                                    className="btn btn-primary w-100 py-2 fw-bold shadow-sm"
-                                    style={{
-                                      backgroundColor: "#1C59A1",
-                                      borderColor: "#1C59A1",
-                                    }}
-                                    onClick={() =>
-                                      handleSaveResult(image.id, gradingExamId)
-                                    }
-                                  >
-                                    <i className="bi bi-floppy2-fill me-2"></i>
-                                    Lưu kết quả
-                                  </button>
+                                  {image.result.details?.length == 0 && (
+                                    <button
+                                      className="btn btn-primary w-100 py-2 fw-bold shadow-sm"
+                                      style={{
+                                        backgroundColor: "#1C59A1",
+                                        borderColor: "#1C59A1",
+                                      }}
+                                      onClick={() =>
+                                        handleSaveResult(
+                                          image.id,
+                                          gradingExamId
+                                        )
+                                      }
+                                    >
+                                      <i className="bi bi-floppy2-fill me-2"></i>
+                                      Lưu kết quả
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             )}
