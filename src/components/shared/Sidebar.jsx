@@ -31,6 +31,10 @@ const Sidebar = ({ items = [], isMobile = false, onItemClick }) => {
     authService.logout();
     navigate("/login", { replace: true });
   };
+  // if (!isAuthenticated) {
+  //   navigate("/login", { replace: true });
+  //   return null;
+  // }
 
   return (
     // <div style={{ backgroundColor: "#f8f9fa" }} className="h-100">

@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button, Row, Col, Card, Form, Table, Spinner, Alert } from "react-bootstrap";
+import {
+  Button,
+  Row,
+  Col,
+  Card,
+  Form,
+  Table,
+  Spinner,
+  Alert,
+} from "react-bootstrap";
 import gradingService from "../service/grading";
 import Portal from "../components/shared/item/Portal";
 
@@ -21,13 +30,9 @@ const getAnswerLetter = (value) => {
 };
 
 const Grading = () => {
-  // const [cameraUrl, setCameraUrl] = useState(
-  //   `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
-  // );
   const [cameraStreamUrl, setCameraStreamUrl] = useState(
     `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
   );
-  // const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImages, setCapturedImages] = useState([]);
   const [gradingExamId, setGradingExamId] = useState("");
@@ -50,7 +55,6 @@ const Grading = () => {
       )
     );
   };
-
 
   const applyResultDetailsToImage = (imageId, resultDetail) => {
     if (!resultDetail) return;
@@ -91,10 +95,6 @@ const Grading = () => {
     );
   };
 
-  // useEffect(() => {
-  //   const url = gradingService.fetchCameraStreamUrl();
-  //   setCameraStreamUrl(url);
-  // }, []);
   useEffect(() => {
     return () => {
       capturedImages.forEach((img) => URL.revokeObjectURL(img.src));
@@ -105,8 +105,17 @@ const Grading = () => {
     if (!file) return;
 
     const imageUrl = URL.createObjectURL(file);
-    const newImage = { id: Date.now(), src: imageUrl, file, status: 'idle', result: null, error: null, examineeId: '', isShowDetails: true, };
-    setCapturedImages(prev => [newImage, ...prev]);
+    const newImage = {
+      id: Date.now(),
+      src: imageUrl,
+      file,
+      status: "idle",
+      result: null,
+      error: null,
+      examineeId: "",
+      isShowDetails: true,
+    };
+    setCapturedImages((prev) => [newImage, ...prev]);
   };
 
   const captureImage = async () => {
@@ -127,7 +136,6 @@ const Grading = () => {
         examineeId: "",
         isShowDetails: true,
       };
-      // setCapturedImages((prev) => [newImage, ...prev]);
       setCapturedImages((prev) => {
         if (prev.length >= 10) {
           const oldImage = prev[prev.length - 1];
@@ -157,7 +165,7 @@ const Grading = () => {
       console.error("Lỗi fetchRecords:", error);
       setRecordsError("Không thể tải danh sách.");
       setRecords([]);
-      return []; 
+      return [];
     } finally {
       setRecordsLoading(false);
     }
@@ -211,13 +219,15 @@ const Grading = () => {
     );
   };
 
-  
   const handleSaveResult = async (imageId, gradingExamId) => {
+    setCapturedImages((prev) =>
+      prev.map((img) => (img.id === imageId ? { ...img, isSaving: true } : img))
+    );
+
     const targetImage = capturedImages.find((img) => img.id === imageId);
 
     if (!targetImage?.result) return;
     const currentSBD = targetImage.result.sbd;
-
 
     try {
       await gradingService.saveResult({
@@ -265,24 +275,16 @@ const Grading = () => {
     } catch (error) {
       console.error("Lỗi quy trình Lưu:", error);
       alert("Lỗi khi lưu kết quả.");
+    } finally {
+      setCapturedImages((prev) =>
+        prev.map((img) =>
+          img.id === imageId ? { ...img, isSaving: false } : img
+        )
+      );
     }
   };
 
   const handleGradeImage = async (imageId) => {
-    // if (!gradingExamId) {
-    //   setCapturedImages((prev) =>
-    //     prev.map((img) =>
-    //       img.id === imageId
-    //         ? {
-    //             ...img,
-    //             error: "Vui lòng nhập mã kỳ thi trước khi nhận diện.",
-    //           }
-    //         : img
-    //     )
-    //   );
-    //   return;
-    // }
-
     const targetImage = capturedImages.find((img) => img.id === imageId);
     if (!targetImage) return;
 
@@ -358,11 +360,7 @@ const Grading = () => {
     <>
       {zoomImage && (
         <Portal>
-          <div
-            // className="fixed inset-0 bg-black/70 flex items-center justify-center z-[99999999]"
-            className="lightbox-overlay"
-            onClick={closeZoom}
-          >
+          <div className="lightbox-overlay" onClick={closeZoom}>
             <img
               src={zoomImage}
               className="rounded shadow-lg"
@@ -393,9 +391,8 @@ const Grading = () => {
           >
             <img
               ref={cameraImgRef}
-              src={cameraStreamUrl} // <--- Dùng biến state ở đây
+              src={cameraStreamUrl}
               alt="Camera Stream"
-              // src="/api/CameraStream/TMDB-00001/"
               crossOrigin="anonymous"
               className="w-full h-full object-cover"
               style={{
@@ -417,7 +414,6 @@ const Grading = () => {
             style={{ background: "#1C59A1" }}
             className="mt-3 me-2"
             onClick={handleRefreshCamera}
-            // disabled={isCapturing}
           >
             Làm mới Camera
           </Button>
@@ -584,7 +580,6 @@ const Grading = () => {
                                         overflowY: "auto",
                                       }}
                                     >
-                                      {/* {image.result.details?.length > 0 ? ( */}
                                       {console.log(
                                         `Ảnh ${image.id} - Details Length:`,
                                         image.result.details?.length
@@ -713,9 +708,11 @@ const Grading = () => {
                                           gradingExamId
                                         )
                                       }
+                                      disabled={image.isSaving}
                                     >
-                                      <i className="bi bi-floppy2-fill me-2"></i>
-                                      Lưu kết quả
+                                      {image.isSaving
+                                        ? "Đang xử lý..."
+                                        : "Lưu kết quả"}
                                     </button>
                                   )}
                                 </div>
@@ -780,26 +777,13 @@ const Grading = () => {
                       <th>#</th>
                       <th>Mã SV</th>
                       <th>Họ tên</th>
-                      {/* <th>Mã đề</th> */}
-                      {/* <th>Số câu đúng</th> */}
                       <th className="text-end">Điểm</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* {records.map((record, index) => (
-                      <tr key={record.recordId}>
-                        <td>{index + 1}</td>
-                        <td>{record.studentCode}</td>
-                        <td>{record.fullName}</td>
-                        <td>{record.made}</td>
-                        <td>{record.correctCount}</td>
-                        <td>{record.score}</td>
-                      </tr>
-                    ))} */}
                     {records.map((record, index) => (
                       <tr
                         key={record.recordId}
-                        // onClick={() => handleSelectRecord(record)}
                         style={{ cursor: "pointer" }}
                         title="Bấm để xem lại bài thi"
                         onClick={() => openZoom(record.processedImage)}
@@ -807,7 +791,6 @@ const Grading = () => {
                         <td>{index + 1}</td>
                         <td className="fw-bold">{record.studentCode}</td>
                         <td>{record.fullName}</td>
-                        {/* <td>{record.made}</td> */}
                         <td className="text-end fw-bold text-primary">
                           {record.score}
                         </td>
@@ -825,4 +808,3 @@ const Grading = () => {
 };
 
 export default Grading;
-
