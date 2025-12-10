@@ -1,46 +1,16 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Container, Row, Col, Offcanvas } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { Spinner } from "react-bootstrap";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const TeacherLayout = () => {
-  const navigate = useNavigate();
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const handleCloseMobileSidebar = () => setShowMobileSidebar(false);
   const handleShowMobileSidebar = () => setShowMobileSidebar(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); 
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkLogin = () => {
-      const token = localStorage.getItem("accessToken");
-
-      if (!token) {
-        navigate("/login");
-      } else {
-        setIsAuthenticated(true);
-        setIsLoading(false);
-      }
-    };
-
-    checkLogin();
-  }, [navigate]); 
-  if (isLoading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <Spinner animation="border" variant="primary" />
-      </div>
-    );
-  }
-  if (!isAuthenticated) {
-    return null;
-  }
   return (
     <>
       <Navbar
@@ -92,7 +62,9 @@ const TeacherLayout = () => {
         <Offcanvas.Header
           closeButton
           style={{ backgroundColor: "#1C59A1", color: "white" }}
-        ></Offcanvas.Header>
+        >
+
+        </Offcanvas.Header>
         <Offcanvas.Body className="p-0">
           <Sidebar />
         </Offcanvas.Body>
