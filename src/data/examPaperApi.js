@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./clientApi";
 export default {
   createPaper: (examId, data) => api.post(`/Exams/${examId}/Papers/`, data),
   updatePaper: (examId, paperId, data) =>

@@ -1,7 +1,7 @@
-import cameraApi from "../../api/cameraApi";
-import gradingApi from "../../api/gradingApi";
-import examineeRecordApi from "../../api/examineeRecordApi";
-import examineeApi from "../../api/examineeApi";
+import cameraApi from "../../data/cameraApi";
+import gradingApi from "../../data/gradingApi";
+import examineeRecordApi from "../../data/examineeRecordApi";
+import examineeApi from "../../data/examineeApi";
 import {
   enrichRecordsWithDetails,
   mapProcessingResponse,

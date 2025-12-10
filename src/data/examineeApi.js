@@ -1,5 +1,5 @@
 // src/api/examineeApi.js
-import api from "./api";
+import api from "./clientApi";
 
 const examineeApi = {
   addExaminee: (data) =>

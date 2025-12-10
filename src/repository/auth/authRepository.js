@@ -1,4 +1,4 @@
-import api from "../../api/api";
+import api from "../../data/clientApi";
 
 // // const API_URL = "/api";
 // const API_URL = import.meta.env.VITE_API_URL || "https://testmarkdb.azurewebsites.net/api";
