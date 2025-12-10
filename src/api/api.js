@@ -1,28 +1,50 @@
-import axios from "axios";
+import axios from "axios"; 
+const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; 
 
-const API_URL = "/api";
 const api = axios.create({
-  baseURL: API_URL,
-});
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
+  baseURL: baseURL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+}); 
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+ 
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config; 
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; 
+
       const refresh = localStorage.getItem("refreshToken");
       if (refresh) {
-        const res = await axios.post(`${API_URL}/token/refresh/`, { refresh });
-        localStorage.setItem("accessToken", res.data.access);
-        error.config.headers.Authorization = `Bearer ${res.data.access}`;
-        return axios(error.config);
+        try { 
+          const res = await axios.post(`${baseURL}/token/refresh/`, { refresh });
+          
+          if (res.data.access) { 
+            localStorage.setItem("accessToken", res.data.access); 
+            originalRequest.headers.Authorization = `Bearer ${res.data.access}`; 
+            return api(originalRequest);
+          }
+        } catch (refreshError) { 
+          console.error("Phiên đăng nhập hết hạn:", refreshError);
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";  
+          return Promise.reject(refreshError);
+        }
+      } else {
+         localStorage.removeItem("accessToken");
+         window.location.href = "/login";
       }
     }
     return Promise.reject(error);
