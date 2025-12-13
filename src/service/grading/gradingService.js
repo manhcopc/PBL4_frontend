@@ -38,6 +38,7 @@ export default function createGradingService() {
         throw new Error("Thiếu ảnh để chấm bài thi.");
       }
       const normalizedFile = ensureFileObject(file);
+      console.log("Processing file:", normalizedFile);
       return gradingRepository.processImage(normalizedFile);
     },
     

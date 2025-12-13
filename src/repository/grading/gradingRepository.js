@@ -90,12 +90,15 @@ export default function createGradingRepository() {
       const formData = new FormData();
       if (file) {
         formData.append("image", file, file.name || "upload.jpg");
+        // formData.append("file", file, file.name || "snapshot.jpg");
       }
       const res = await gradingApi.imageProcess(formData);
+      console.log("Repository Processing Response:", res.data);
       return mapProcessingResponse(res.data || {});
     },
 
     async saveResult(payload) {
+      console.log("Saving result with payload:", payload);
       return gradingApi.imageProcessSave(payload);
     },
 

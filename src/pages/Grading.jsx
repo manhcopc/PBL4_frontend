@@ -11,6 +11,7 @@ import {
 } from "react-bootstrap";
 import gradingService from "../service/grading";
 import Portal from "../components/shared/item/Portal";
+import heic2any from "heic2any";
 
 const ANSWER_OPTIONS = ["A", "B", "C", "D", "?"];
 const getAnswerLetter = (value) => {
@@ -26,7 +27,7 @@ const getAnswerLetter = (value) => {
   if (ANSWER_OPTIONS.includes(upper)) {
     return upper;
   }
-  return ANSWER_OPTIONS[0];
+  return null;
 };
 
 const Grading = () => {
@@ -100,24 +101,71 @@ const Grading = () => {
       capturedImages.forEach((img) => URL.revokeObjectURL(img.src));
     };
   }, []);
-  const handleUploadFromDevice = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  // const handleUploadFromDevice = (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
+  //   const imageUrl = URL.createObjectURL(file);
+  //   const newImage = {
+  //     id: Date.now(),
+  //     src: imageUrl,
+  //     file,
+  //     status: "idle",
+  //     result: null,
+  //     error: null,
+  //     examineeId: "",
+  //     isShowDetails: true,
+  //   };
+  //   setCapturedImages((prev) => [newImage, ...prev]);
+  // };
+
+const handleUploadFromDevice = async (event) => {
+  const originalFile = event.target.files[0];
+  if (!originalFile) return;
+
+  try {
+    let fileToProcess = originalFile;
+    const isHeic =
+      originalFile.type === "image/heic" ||
+      originalFile.type === "image/heif" ||
+      originalFile.name.toLowerCase().endsWith(".heic") ||
+      originalFile.name.toLowerCase().endsWith(".heif");
+
+    if (isHeic) {
+      console.log("Phát hiện ảnh HEIC, đang chuyển đổi sang JPEG...");
+      const convertedBlob = await heic2any({
+        blob: originalFile,
+        toType: "image/jpeg",
+        quality: 0.8, 
+      });
+      const blob = Array.isArray(convertedBlob)
+        ? convertedBlob[0]
+        : convertedBlob;
+      fileToProcess = new File(
+        [blob],
+        originalFile.name.replace(/\.(heic|heif)$/i, ".jpg"),
+        { type: "image/jpeg" }
+      );
+    }
+    const imageUrl = URL.createObjectURL(fileToProcess);
+
     const newImage = {
       id: Date.now(),
       src: imageUrl,
-      file,
+      file: fileToProcess, 
       status: "idle",
       result: null,
       error: null,
       examineeId: "",
       isShowDetails: true,
     };
-    setCapturedImages((prev) => [newImage, ...prev]);
-  };
 
+    setCapturedImages((prev) => [newImage, ...prev]);
+  } catch (error) {
+    console.error("Lỗi khi xử lý file:", error);
+    alert("Không thể đọc file ảnh này. Vui lòng thử lại.");
+  }
+};
   const captureImage = async () => {
     setIsCapturing(true);
     try {
@@ -287,7 +335,6 @@ const Grading = () => {
   const handleGradeImage = async (imageId) => {
     const targetImage = capturedImages.find((img) => img.id === imageId);
     if (!targetImage) return;
-
     setCapturedImages((prev) =>
       prev.map((img) =>
         img.id === imageId ? { ...img, status: "grading", error: null } : img
@@ -432,7 +479,8 @@ const Grading = () => {
             </Form.Label>
             <Form.Control
               type="file"
-              accept="image/*"
+              // accept="image/*"
+              accept="image/png, image/jpeg, image/jpg, .heic, .heif"
               onChange={handleUploadFromDevice}
             />
           </Form.Group>
