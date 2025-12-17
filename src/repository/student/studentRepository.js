@@ -1,4 +1,4 @@
-import examineeApi from "../../api/examineeApi";
+import examineeApi from "../../data/examineeApi";
 import {
   mapStudentEntity,
   mapStudentDetailResponse,

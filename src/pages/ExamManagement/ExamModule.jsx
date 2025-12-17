@@ -15,7 +15,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import CreateExam from "./CreateExam";
 import EditExam from "./EditExam";
 import "../../assets/Share.css"
-import examApi from "../../api/examApi";
+import examApi from "../../data/examApi";
 import examManagementService from "../../service/examManagement/";
 const ExamModule = () => {
   const [showCreateExam, setShowCreateExam] = useState(false);

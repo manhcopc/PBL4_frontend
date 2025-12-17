@@ -1,9 +1,5 @@
-import api from "../../api/api";
+import api from "../../data/api";
 
-// const API_URL = "/api";
-// const publicClient = axios.create({
-//   baseURL: API_URL,
-// });
 
 export default function createAuthRepository() {
   return {

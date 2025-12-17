@@ -1,10 +1,10 @@
-import examApi from "../../api/examApi";
-import examPaperApi from "../../api/examPaperApi";
-import examAnswerApi from "../../api/examAnswerApi";
-import examineeRecordApi from "../../api/examineeRecordApi";
-import examineeApi from "../../api/examineeApi";
+import examApi from "../../data/examApi";
+import examPaperApi from "../../data/examPaperApi";
+import examAnswerApi from "../../data/examAnswerApi";
+import examineeRecordApi from "../../data/examineeRecordApi";
+import examineeApi from "../../data/examineeApi";
 import {
-  createExamPaper,
+  // createExamPaper,
   createExamStudent,
 } from "../../domain/exam/models";
 import {
