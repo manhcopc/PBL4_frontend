@@ -55,7 +55,9 @@ const ExamModule = () => {
     setExamError("");
     try {
       const res = await examApi.getAllExams();
+      console.log("Dữ liệu đề thi từ API:", res.data);
       const raw = Array.isArray(res.data) ? res.data : [];
+      // console.log("Dữ liệu đề thi thô:", raw);
       const enriched = await Promise.all(
         raw.map(async (exam) => {
           try {
@@ -69,6 +71,7 @@ const ExamModule = () => {
               paperCount: examForm.examCodes.length,
               studentCount: examForm.students.length,
             };
+
           } catch (detailError) {
             return {
               ...exam,
@@ -85,6 +88,7 @@ const ExamModule = () => {
         })
       );
       setExams(enriched);
+      console.log("Danh sách đề thi đã tải:", enriched);
     } catch (error) {
       console.error("Không thể tải danh sách đề thi", error);
       setExamError("Không thể tải danh sách đề thi");
