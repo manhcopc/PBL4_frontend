@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/test-google",
+      "destination": "https://www.google.com/"
+    },
+    {
       "source": "/server/:path*",
       "destination": "https://testmarkdb.azurewebsites.net/api/:path*"
     },
