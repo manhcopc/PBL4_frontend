@@ -49,7 +49,7 @@ function ChangePassword() {
 
   return (
     <Container className="py-4">
-      <h3>Đổi mật khẩu</h3>
+      <h1 style={{ color: "#1C59A1" }}>Đổi mật khẩu</h1>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>Nhập mật khẩu cũ</Form.Label>
