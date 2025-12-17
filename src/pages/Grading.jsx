@@ -32,7 +32,7 @@ const getAnswerLetter = (value) => {
 
 const Grading = () => {
   const [cameraStreamUrl, setCameraStreamUrl] = useState(
-    `/api/CameraStream/TMDB-00001/?t=${Date.now()}`
+    `/server/CameraStream/TMDB-00001/?t=${Date.now()}`
   );
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImages, setCapturedImages] = useState([]);
@@ -46,7 +46,7 @@ const Grading = () => {
   const cameraImgRef = useRef(null);
 
   const handleRefreshCamera = () => {
-    setCameraStreamUrl(`/api/CameraStream/TMDB-00001/?t=${Date.now()}`);
+    setCameraStreamUrl(`/server/CameraStream/TMDB-00001/?t=${Date.now()}`);
   };
 
   const toggleImageDetails = (imageId) => {
