@@ -38,12 +38,22 @@ export default function createAuthService(authRepository, tokenStorage = default
       const payload = createPasswordResetRequest({ email, action });
       return authRepository.requestPasswordReset(payload);
     },
-    async verifyOtp(email, otp) {
-      const payload = createOtpVerification({ email, otp });
-      return authRepository.verifyOtp(payload);
+    async verifyOtp(token, code) {
+      const payload = createOtpVerification({ token, code });
+      
+      // 👇 SỬA LẠI: Dùng dấu phẩy để trình duyệt hiển thị chi tiết object
+      console.log("Dữ liệu gửi đi trong service:", payload); 
+      
+      const data = await authRepository.verifyOtp(payload);
+      
+      // 👇 QUAN TRỌNG: Dùng dấu phẩy để xem cấu trúc trả về
+      console.log("Dữ liệu trả về trong service (Tìm token mới ở đây):", data);
+      
+      return data;
     },
     async resetPassword(token, newPassword) {
       const payload = createResetPasswordPayload({ token, newPassword });
+      console.log(`dữ liệu gửi đi trong service ${payload}`);
       return authRepository.resetPassword(payload);
     },
     async changePassword(oldPassword, newPassword) {

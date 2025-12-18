@@ -13,6 +13,7 @@ export default function Login() {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetForm, setResetForm] = useState({
     email: "",
+    token: "",
     otp: "",
     newPassword: "",
     confirmPassword: "",
@@ -40,7 +41,13 @@ export default function Login() {
     }
     setIsSendingOtp(true);
     try {
-      await authService.requestPasswordReset(resetForm.email, "password_reset");
+      const res = await authService.requestPasswordReset(
+        resetForm.email,
+        "password_reset"
+      );
+      console.log(res);
+      setResetForm((prev) => ({ ...prev, token: res.request }));
+
       setOtpSent(true);
       setResetMessage({
         type: "success",
@@ -61,12 +68,11 @@ export default function Login() {
 
   const handleResetPassword = async () => {
     setResetMessage({ type: "", text: "" });
-    if (!otpSent) {
-      setResetMessage({ type: "danger", text: "Vui lòng gửi OTP trước." });
-      return;
-    }
-    if (!resetForm.otp) {
-      setResetMessage({ type: "danger", text: "Vui lòng nhập mã OTP." });
+    if (!otpSent || !resetForm.otp) {
+      setResetMessage({
+        type: "danger",
+        text: "Vui lòng nhập đầy đủ thông tin.",
+      });
       return;
     }
     if (resetForm.newPassword !== resetForm.confirmPassword) {
@@ -76,41 +82,64 @@ export default function Login() {
       });
       return;
     }
+
     setIsResetting(true);
     try {
+      // 1. Gọi API Verify với token CŨ (Token lấy từ SendOTP)
+      console.log("Đang verify với token cũ:", resetForm.token);
       const verifyRes = await authService.verifyOtp(
-        resetForm.email,
+        resetForm.token,
         resetForm.otp
       );
-      const token =
-        verifyRes?.token ||
-        verifyRes?.verification_token ||
-        verifyRes?.data?.token;
-      if (!token) {
-        throw new Error("Không nhận được token xác thực");
+
+      // 👇 QUAN TRỌNG 1: Log ra xem cấu trúc server trả về cái gì
+      console.log("Full Response từ VerifyOTP:", verifyRes);
+
+      // 👇 QUAN TRỌNG 2: Trích xuất token MỚI.
+      // Tùy vào axiosClient của bạn có trả về .data hay không mà chọn dòng phù hợp:
+      // Cách an toàn nhất là kiểm tra cả 2 trường hợp:
+      const newResetToken =
+        verifyRes?.token || verifyRes?.data?.token || verifyRes?.access;
+
+      // Kiểm tra xem có lấy được token mới không
+      if (!newResetToken) {
+        throw new Error("Server không trả về token mới để đặt lại mật khẩu.");
       }
 
-      await authService.resetPassword(token, resetForm.newPassword);
+      // So sánh thử xem nó có khác token cũ không (để debug)
+      if (newResetToken === resetForm.token) {
+        console.warn(
+          "⚠️ Cảnh báo: Backend trả về token mới GIỐNG HỆT token cũ. Hãy kiểm tra lại Backend nếu cần thiết."
+        );
+      } else {
+        console.log("✅ Đã lấy được token mới:", newResetToken);
+      }
+
+      // 👇 QUAN TRỌNG 3: Truyền biến newResetToken vào hàm resetPassword
+      // (Tuyệt đối không dùng resetForm.token ở đây)
+      await authService.resetPassword(newResetToken, resetForm.newPassword);
 
       setResetMessage({
         type: "success",
         text: "Đặt lại mật khẩu thành công, bạn có thể đăng nhập lại.",
       });
+
+      // Clear form
       setResetForm({
         email: "",
         otp: "",
         newPassword: "",
         confirmPassword: "",
+        token: "",
       });
       setOtpSent(false);
       setShowResetForm(false);
     } catch (err) {
-      console.error("Không thể đặt lại mật khẩu", err);
+      console.error("Lỗi quy trình đặt lại mật khẩu:", err);
       setResetMessage({
         type: "danger",
         text:
-          err.response?.data?.detail ||
-          "Không thể đặt lại mật khẩu. Vui lòng kiểm tra thông tin.",
+          err.response?.data?.detail || "Lỗi xác thực hoặc đặt lại mật khẩu.",
       });
     } finally {
       setIsResetting(false);

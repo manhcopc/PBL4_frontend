@@ -16,10 +16,14 @@ export default function createAuthRepository() {
     },
     async verifyOtp(payload) {
       const res = await api.post("/VerifyOTP/", payload);
+            console.log("dữ liệu trả về trong repository ", res.data);
+
       return res.data;
     },
     async resetPassword(payload) {
-      const res = await api.post("/ResetPassword/", payload);
+      const res = await api.post("/PasswordReset/", payload);
+      // console.log("dữ liệu trả về trong repository ", res.data);
+  
       return res.data;
     },
     async changePassword(payload) {

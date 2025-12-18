@@ -13,9 +13,9 @@ export const createPasswordResetRequest = ({ email, action }) => ({
   action,
 });
 
-export const createOtpVerification = ({ email, otp }) => ({
-  email,
-  otp,
+export const createOtpVerification = ({ token, code }) => ({
+  token,
+  code,
 });
 
 export const createResetPasswordPayload = ({ token, newPassword }) => ({
